@@ -15,11 +15,14 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+let currentUser = null;
 let currentUserRole = "user";
 let currentPostToClose = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        currentUser = user;
+        document.getElementById("user-email-display").innerText = `Bejelentkezve: ${user.email}`;
         const users = await getDocs(collection(db, "users"));
         users.forEach((docu) => {
             if (docu.id === user.email) {
@@ -70,6 +73,7 @@ window.closeModal = function() {
 window.submitSolution = async function() {
     const solutionText = document.getElementById("solution-text").value;
     if (!solutionText || !currentPostToClose) return alert("Írj be megoldási szöveget!");
+    
     const postRef = doc(db, "posts", currentPostToClose);
     const postDoc = await getDocs(collection(db, "posts"));
     let postData = null;

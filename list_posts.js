@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, increment, query, orderBy, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, increment, query, orderBy, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -21,8 +21,8 @@ let currentUserRole = "user";
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUserEmail = user.email;
-        const userDoc = await getDocs(collection(db, "users"));
-        userDoc.forEach((docu) => {
+        const userDocs = await getDocs(collection(db, "users"));
+        userDocs.forEach((docu) => {
             if (docu.id === currentUserEmail) {
                 currentUserRole = docu.data().role;
             }
@@ -69,7 +69,7 @@ window.listPosts = async function() {
                 <button class="like-button ${liked ? "active" : ""}" onclick="toggleLike('${post.id}', ${liked})">
                     ${liked ? "Visszavonás 👎" : "Lájk 👍"}
                 </button>
-                ${currentUserRole === "hokos" ? `<button onclick="markUnderProcess('${post.id}')">Ügyintézés alá vonás</button>` : ""}
+                ${(currentUserRole === "admin" || currentUserRole === "hokos") ? `<button onclick="markUnderProcess('${post.id}')">Ügyintézés alá vonás</button>` : ""}
                 ${(currentUserRole === "admin" || data.author === currentUserEmail) ? `<button onclick="deletePost('${post.id}')">🗑 Törlés</button>` : ""}
             `;
             postList.appendChild(div);
@@ -95,7 +95,7 @@ window.toggleLike = async function(postId, currentlyLiked) {
 };
 
 window.markUnderProcess = async function(postId) {
-    await updateDoc(doc(db, "posts", postId), { underProcess: true });
+    await updateDoc(doc(db, "posts", postId), { underProcess: true, underProcessDate: new Date() });
     alert("Poszt ügyintézés alá helyezve.");
     listPosts();
 };

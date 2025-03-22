@@ -5,8 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ügyintézés alatt lévő posztok</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        #user-email-display {
+            position: fixed;
+            top: 5px;
+            left: 10px;
+            font-size: 12px;
+            color: gray;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 100px auto;
+            width: 80%;
+            max-width: 500px;
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+        }
+    </style>
 </head>
 <body class="light-mode">
+    <div id="user-email-display"></div>
     <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
     <h1>Ügyintézés alatt lévő posztok</h1>
     <div id="under-process-list"></div>
