@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, deleteUser, getIdToken, getIdTokenResult } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -74,6 +74,20 @@ async function betoltTemak() {
     });
 }
 
+window.hozzaadTemat = async function() {
+    const ujTema = document.getElementById("new-topic").value.trim();
+    if (!ujTema) return alert("Adj meg egy témanevet!");
+
+    try {
+        await setDoc(doc(db, "topics", ujTema), {});
+        alert(`Téma hozzáadva: ${ujTema}`);
+        document.getElementById("new-topic").value = "";
+        betoltTemak();
+    } catch (error) {
+        alert("Hiba a téma hozzáadásakor: " + error.message);
+    }
+};
+
 window.ujPoszt = async function() {
     const title = document.getElementById("post-title").value;
     const content = document.getElementById("post-content").value;
@@ -84,7 +98,7 @@ window.ujPoszt = async function() {
 };
 
 window.setUserRole = async function() {
-    const userEmail = document.getElementById("user-email").value;
+    const userEmail = document.getElementById("user-email").value.trim();
     const selectedRole = document.getElementById("role-select").value;
 
     if (!userEmail || !selectedRole) {
@@ -92,7 +106,13 @@ window.setUserRole = async function() {
     }
 
     try {
-        await setDoc(doc(db, "users", userEmail), { role: selectedRole });
+        const userRef = doc(db, "users", userEmail);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            await updateDoc(userRef, { role: selectedRole });
+        } else {
+            await setDoc(userRef, { role: selectedRole });
+        }
         alert(`Jogkör beállítva: ${userEmail} -> ${selectedRole}`);
     } catch (error) {
         alert("Hiba a jogkör állítás során: " + error.message);
