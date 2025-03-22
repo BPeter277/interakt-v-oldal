@@ -3,12 +3,12 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "EZ_A_TE_API_KEY",
-  authDomain: "a-te-projekted.firebaseapp.com",
-  projectId: "a-te-projekted",
-  storageBucket: "a-te-projekted.appspot.com",
-  messagingSenderId: "szám",
-  appId: "appid"
+  aapiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
+  authDomain: "bejelent-3768f.firebaseapp.com",
+  projectId: "bejelent-3768f",
+  storageBucket: "bejelent-3768f.firebasestorage.app",
+  messagingSenderId: "253589417646",
+  appId: "1:253589417646:web:2fb9eea186af2c6243873f"
 };
 
 const app = initializeApp(firebaseConfig);
