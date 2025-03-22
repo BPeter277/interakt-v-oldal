@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc, updateDoc, increment, query } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -41,11 +41,12 @@ window.kijelentkez = function() {
     signOut(auth);
 };
 
-window.jelszoModositas = async function() {
-    const newPassword = document.getElementById("new-password").value;
+window.elfelejtettJelszo = async function() {
+    const email = document.getElementById("email").value;
+    if (!email) return alert("Kérlek add meg az email címed!");
     try {
-        await updatePassword(auth.currentUser, newPassword);
-        alert("Jelszó sikeresen módosítva!");
+        await sendPasswordResetEmail(auth, email);
+        alert("Jelszó visszaállítási email elküldve!");
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -64,74 +65,13 @@ async function betoltTemak() {
     });
 }
 
-async function updateAdminStats() {
-    const userCountEl = document.getElementById("user-count");
-    const postCountEl = document.getElementById("post-count");
-    const likesEl = document.getElementById("total-likes");
-    if (userCountEl && postCountEl && likesEl) {
-        const users = await getDocs(collection(db, "users"));
-        userCountEl.textContent = `Felhasználók száma: ${users.size}`;
-        const posts = await getDocs(collection(db, "posts"));
-        postCountEl.textContent = `Posztok száma: ${posts.size}`;
-        let totalLikes = 0;
-        posts.forEach(p => totalLikes += p.data().likes || 0);
-        likesEl.textContent = `Összes lájk: ${totalLikes}`;
-    }
-}
-
 window.ujPoszt = async function() {
     const title = document.getElementById("post-title").value;
     const content = document.getElementById("post-content").value;
     const topic = document.getElementById("post-topic").value;
     if (!topic) return alert("Válassz témát a legördülő listából!");
-    try {
-        await addDoc(collection(db, "posts"), { title, content, topic, author: auth.currentUser.email, date: new Date(), likes: 0, likedBy: [], underProcess: false });
-        alert("Poszt sikeresen létrehozva!");
-    } catch (error) {
-        alert("Hiba: " + error.message);
-    }
-};
-
-window.addTopic = async function() {
-    const newTopic = document.getElementById("new-topic").value;
-    if (!newTopic) return alert("Adj meg egy témanevet!");
-    try {
-        await setDoc(doc(db, "topics", newTopic), {});
-        alert("Új téma hozzáadva: " + newTopic);
-        betoltTemak();
-    } catch (error) {
-        alert("Hiba: " + error.message);
-    }
-};
-
-window.setUserRole = async function() {
-    const userEmail = document.getElementById("user-email").value;
-    const selectedRole = document.getElementById("role-select").value;
-    try {
-        await setDoc(doc(db, "users", userEmail), { role: selectedRole });
-        alert("Jogkör sikeresen beállítva: " + selectedRole);
-    } catch (error) {
-        alert("Hiba: " + error.message);
-    }
-};
-
-window.listUsers = async function() {
-    const userList = document.getElementById("user-list");
-    userList.innerHTML = "";
-    const snapshot = await getDocs(collection(db, "users"));
-    snapshot.forEach((docu) => {
-        const li = document.createElement("li");
-        li.textContent = `${docu.id} (jogkör: ${docu.data().role}) `;
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Törlés";
-        deleteBtn.onclick = async () => {
-            await deleteDoc(doc(db, "users", docu.id));
-            alert(`Törölve: ${docu.id}`);
-            listUsers();
-        };
-        li.appendChild(deleteBtn);
-        userList.appendChild(li);
-    });
+    await addDoc(collection(db, "posts"), { title, content, topic, author: auth.currentUser.email, date: new Date(), likes: 0, likedBy: [], underProcess: false });
+    alert("Poszt sikeresen létrehozva!");
 };
 
 onAuthStateChanged(auth, async (user) => {
@@ -139,26 +79,29 @@ onAuthStateChanged(auth, async (user) => {
     const logoutBtn = document.getElementById("logout-btn");
     const adminPanel = document.getElementById("admin-panel");
     const writerPanel = document.getElementById("writer-panel");
-    const userPanel = document.getElementById("user-panel");
-    const udvozles = document.getElementById("udvozles");
-
+    const navButtons = document.getElementById("nav-buttons");
+    const welcomeText = document.getElementById("welcome-text");
     if (user) {
+        document.body.classList.remove('before-login');
+        document.body.classList.add('light-mode');
         authPanel.style.display = "none";
         logoutBtn.style.display = "block";
+        adminPanel.style.display = "none";
+        writerPanel.style.display = "none";
+        navButtons.style.display = "block";
         const userDoc = await getDoc(doc(db, "users", user.email));
         const role = userDoc.exists() ? userDoc.data().role : "user";
-        udvozles.innerText = `Bejelentkezve: ${user.email}`;
-        adminPanel.style.display = role === "admin" ? "block" : "none";
-        writerPanel.style.display = (role === "writer" || role === "admin") ? "block" : "none";
-        userPanel.style.display = "block";
+        if (role === "admin") adminPanel.style.display = "block";
+        if (role === "writer" || role === "admin") writerPanel.style.display = "block";
+        welcomeText.style.display = "none";
         betoltTemak();
-        updateAdminStats();
     } else {
+        document.body.classList.add('before-login');
         authPanel.style.display = "block";
         logoutBtn.style.display = "none";
         adminPanel.style.display = "none";
         writerPanel.style.display = "none";
-        userPanel.style.display = "none";
-        udvozles.innerText = "";
+        navButtons.style.display = "none";
+        welcomeText.style.display = "block";
     }
 });

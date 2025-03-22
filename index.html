@@ -5,14 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogkörös Webapp Firebase-el</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        body.before-login {
+            background: url('https://images.unsplash.com/photo-1498575207490-7a37c27b91f9?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+            background-size: cover;
+        }
+    </style>
 </head>
-<body class="light-mode">
+<body class="before-login">
     <div class="header">
         <button id="logout-btn" onclick="kijelentkez()" style="display:none;">Kijelentkezés</button>
     </div>
 
-    <h1 class="animated-title">Üdvözöl a közösségi platform!</h1>
-    <p class="animated-subtitle">Jelentkezz be vagy regisztrálj, hogy használhasd a funkciókat!</p>
+    <h1 class="animated-title" id="welcome-text">Jelentkezz be vagy regisztrálj, hogy használhasd a funkciókat!</h1>
 
     <div id="auth-panel">
         <input type="email" id="email" placeholder="Email cím">
@@ -20,14 +25,7 @@
         <br>
         <button onclick="regisztral()">Regisztráció</button>
         <button onclick="bejelentkez()">Bejelentkezés</button>
-    </div>
-
-    <h2 id="udvozles"></h2>
-
-    <div id="user-panel" style="display:none;">
-        <h3>Jelszó módosítása</h3>
-        <input type="password" id="new-password" placeholder="Új jelszó">
-        <button onclick="jelszoModositas()">Jelszó módosítása</button>
+        <button onclick="elfelejtettJelszo()">Elfelejtett jelszó</button>
     </div>
 
     <div id="writer-panel" style="display:none;">
@@ -67,17 +65,12 @@
     </div>
 
     <br>
-    <a href="post_list.html"><button>📄 Posztok listázása</button></a>
-    <a href="profile.html"><button>👤 Saját posztjaim</button></a>
-    <a href="under_process.html"><button>📂 Ügyintézés alatt</button></a>
+    <div id="nav-buttons" style="display:none;">
+        <a href="post_list.html"><button>📄 Posztok listázása</button></a>
+        <a href="profile.html"><button>👤 Saját posztjaim</button></a>
+        <a href="under_process.html"><button>📂 Ügyintézés alatt</button></a>
+    </div>
 
     <script type="module" src="script.js"></script>
-    <script>
-    function toggleTheme() {
-        const body = document.body;
-        body.classList.toggle('dark-mode');
-        body.classList.toggle('light-mode');
-    }
-    </script>
 </body>
 </html>
