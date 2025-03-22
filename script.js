@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, deleteUser, getIdToken, getIdTokenResult } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -26,7 +26,7 @@ window.regisztral = async function() {
         await setDoc(doc(db, "users", email), { role: "writer" });
         await sendEmailVerification(userCredential.user);
         alert("Sikeres regisztráció! Kérlek, erősítsd meg az email-címedet a kiküldött levélben.");
-        await signOut(auth); // Nem marad bejelentkezve
+        await signOut(auth);
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -142,7 +142,7 @@ window.deleteUserAccount = async function(email) {
         try {
             await deleteDoc(doc(db, "users", email));
             alert(`A(z) ${email} felhasználó törölve az adatbázisból.`);
-            showUserListModal(); // Frissítjük a listát
+            showUserListModal(); // Frissíti a listát
         } catch (error) {
             alert("Hiba a törlés során: " + error.message);
         }
