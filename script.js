@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -26,7 +26,7 @@ window.regisztral = async function() {
         await setDoc(doc(db, "users", email), { role: "writer" });
         await sendEmailVerification(userCredential.user);
         alert("Sikeres regisztráció! Kérlek, erősítsd meg az email-címedet a kiküldött levélben.");
-        signOut(auth);
+        await signOut(auth); // Nem marad bejelentkezve
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -38,7 +38,7 @@ window.bejelentkez = async function() {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
-            signOut(auth);
+            await signOut(auth);
             return alert("Először erősítsd meg az email-címedet az emailben kapott link segítségével!");
         }
     } catch (error) {
@@ -93,7 +93,7 @@ onAuthStateChanged(auth, async (user) => {
     const welcomeText = document.getElementById("welcome-text");
     const emailDisplay = document.getElementById("user-email-display");
 
-    if (user) {
+    if (user && user.emailVerified) {
         document.body.classList.remove('before-login');
         authPanel.style.display = "none";
         logoutBtn.style.display = "block";
@@ -127,7 +127,7 @@ window.showUserListModal = async function() {
     const snapshot = await getDocs(collection(db, "users"));
     snapshot.forEach((docu) => {
         const li = document.createElement("li");
-        li.textContent = `${docu.id} (Jogkör: ${docu.data().role})`;
+        li.innerHTML = `${docu.id} (Jogkör: ${docu.data().role}) <button onclick=\"deleteUserAccount('${docu.id}')\">Fiók törlése</button>`;
         userList.appendChild(li);
     });
     document.getElementById("user-list-modal").style.display = "block";
@@ -135,4 +135,16 @@ window.showUserListModal = async function() {
 
 window.closeUserListModal = function() {
     document.getElementById("user-list-modal").style.display = "none";
+};
+
+window.deleteUserAccount = async function(email) {
+    if (confirm(`Biztosan törölni szeretnéd ${email} fiókját?`)) {
+        try {
+            await deleteDoc(doc(db, "users", email));
+            alert(`A(z) ${email} felhasználó törölve az adatbázisból.`);
+            showUserListModal(); // Frissítjük a listát
+        } catch (error) {
+            alert("Hiba a törlés során: " + error.message);
+        }
+    }
 };
