@@ -1,4 +1,3 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, updateDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
@@ -42,7 +41,7 @@ window.listPosts = async function() {
 window.likePost = async function(postId) {
     const postRef = doc(db, "posts", postId);
     await updateDoc(postRef, { likes: increment(1) });
-    alert("Lájk sikeresen hozzáadva!");
+    alert("Lájk hozzáadva!");
     listPosts();
 };
 
