@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -19,13 +19,14 @@ window.regisztral = async function() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     if (!email.endsWith("@uni-corvinus.hu") && !email.endsWith("@stud.uni-corvinus.hu")) {
-        return alert("Csak corvinusos e-mail címmel lehet regisztrálni.");
+        return alert("Nem megfelelő email formátum! Csak corvinusos e-mail címmel lehet regisztrálni.");
     }
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", email), { role: "writer" });
-        await userCredential.user.sendEmailVerification();
-        alert("Sikeres regisztráció! Ellenőrizd az emailt a visszaigazoláshoz.");
+        await sendEmailVerification(userCredential.user);
+        alert("Sikeres regisztráció! Kérlek, erősítsd meg az email-címedet a kiküldött levélben.");
+        signOut(auth);
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -38,7 +39,7 @@ window.bejelentkez = async function() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
             signOut(auth);
-            return alert("Először erősítsd meg az email-címedet az emailben küldött linkkel!");
+            return alert("Először erősítsd meg az email-címedet az emailben kapott link segítségével!");
         }
     } catch (error) {
         alert("Hiba: " + error.message);
