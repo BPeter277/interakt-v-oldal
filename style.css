@@ -5,6 +5,7 @@
   --text-color-dark: #f0f0f0;
   --primary-color: #4a90e2;
   --like-active-color: #357abd;
+  --logout-color: #d32f2f;
 }
 
 body {
@@ -12,6 +13,7 @@ body {
   text-align: center;
   margin-top: 50px;
   transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
 }
 
 body.light-mode {
@@ -74,21 +76,24 @@ ul#user-list {
   padding: 0;
 }
 
-.theme-toggle {
+.header {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 8px 16px;
-  border-radius: 10px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  top: 10px;
+  right: 10px;
 }
 
-.theme-toggle:hover {
-  background-color: #357abd;
+#logout-btn {
+  display: none;
+  background-color: var(--logout-color);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#logout-btn:hover {
+  background-color: #b71c1c;
 }
 
 .post-card {
@@ -99,4 +104,27 @@ ul#user-list {
   text-align: left;
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.animated-title {
+  animation: slideIn 1s ease-out forwards;
+}
+
+.animated-subtitle {
+  animation: fadeIn 2s ease-in forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.admin-stats p {
+  font-weight: bold;
+  margin: 6px 0;
 }

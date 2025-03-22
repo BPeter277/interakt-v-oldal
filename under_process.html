@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ügyintézés alatt lévő posztok</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-mode">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
+    <h1>Ügyintézés alatt lévő posztok</h1>
+    <div id="under-process-list"></div>
+
+    <script type="module" src="under_process.js"></script>
+    <script>
+    function toggleTheme() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
+        body.classList.toggle('light-mode');
+    }
+    </script>
+</body>
+</html>

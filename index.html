@@ -7,14 +7,20 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="light-mode">
-    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
-    <h1>Bejelentkezés / Regisztráció</h1>
-    <input type="email" id="email" placeholder="Email cím">
-    <input type="password" id="password" placeholder="Jelszó">
-    <br>
-    <button onclick="regisztral()">Regisztráció</button>
-    <button onclick="bejelentkez()">Bejelentkezés</button>
-    <button onclick="kijelentkez()">Kijelentkezés</button>
+    <div class="header">
+        <button id="logout-btn" onclick="kijelentkez()" style="display:none;">Kijelentkezés</button>
+    </div>
+
+    <h1 class="animated-title">Üdvözöl a közösségi platform!</h1>
+    <p class="animated-subtitle">Jelentkezz be vagy regisztrálj, hogy használhasd a funkciókat!</p>
+
+    <div id="auth-panel">
+        <input type="email" id="email" placeholder="Email cím">
+        <input type="password" id="password" placeholder="Jelszó">
+        <br>
+        <button onclick="regisztral()">Regisztráció</button>
+        <button onclick="bejelentkez()">Bejelentkezés</button>
+    </div>
 
     <h2 id="udvozles"></h2>
 
@@ -36,11 +42,17 @@
 
     <div id="admin-panel" style="display:none;">
         <h3>Admin felület</h3>
+        <div class="admin-stats">
+            <p id="user-count">Felhasználók száma: </p>
+            <p id="post-count">Posztok száma: </p>
+            <p id="total-likes">Összes lájk: </p>
+        </div>
         <input type="email" id="user-email" placeholder="Felhasználó email">
         <select id="role-select">
             <option value="user">User</option>
             <option value="commenter">Commenter</option>
             <option value="writer">Writer</option>
+            <option value="hokos">Hökös</option>
             <option value="admin">Admin</option>
         </select>
         <button onclick="setUserRole()">Jogkör beállítása</button>
@@ -57,6 +69,7 @@
     <br>
     <a href="post_list.html"><button>📄 Posztok listázása</button></a>
     <a href="profile.html"><button>👤 Saját posztjaim</button></a>
+    <a href="under_process.html"><button>📂 Ügyintézés alatt</button></a>
 
     <script type="module" src="script.js"></script>
     <script>
