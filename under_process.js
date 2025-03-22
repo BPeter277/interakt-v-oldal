@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -16,7 +16,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 let currentUserRole = "user";
-let closePostId = null;
+let currentPostToClose = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -46,10 +46,10 @@ async function listUnderProcess() {
                 <h3>${data.title}</h3>
                 <p>${data.content}</p>
                 <p><strong>Téma:</strong> ${data.topic}</p>
-                <p><small>Közzétéve: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
+                <p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
                 <p><strong>Lájkok:</strong> ${data.likes || 0}</p>
                 ${(currentUserRole === "admin" || currentUserRole === "hokos") 
-                    ? `<button onclick="openModal('${post.id}', ${JSON.stringify(data).replace(/"/g, '&quot;')})">Lezárás</button>` 
+                    ? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button>` 
                     : ""}
             `;
             container.appendChild(div);
@@ -57,22 +57,34 @@ async function listUnderProcess() {
     });
 }
 
-window.openModal = function(postId, postData) {
-    closePostId = { id: postId, data: JSON.parse(postData.replace(/&quot;/g, '"')) };
+window.openSolutionModal = function(postId) {
+    currentPostToClose = postId;
     document.getElementById("modal").style.display = "block";
 };
 
 window.closeModal = function() {
     document.getElementById("modal").style.display = "none";
+    document.getElementById("solution-text").value = "";
 };
 
 window.submitSolution = async function() {
     const solutionText = document.getElementById("solution-text").value;
-    if (!solutionText || !closePostId) return alert("Írd be a megoldást!");
-    const postRef = doc(db, "posts", closePostId.id);
-    const postData = closePostId.data;
+    if (!solutionText || !currentPostToClose) return alert("Írj be megoldási szöveget!");
+    const postRef = doc(db, "posts", currentPostToClose);
+    const postDoc = await getDocs(collection(db, "posts"));
+    let postData = null;
+    postDoc.forEach((p) => {
+        if (p.id === currentPostToClose) {
+            postData = p.data();
+        }
+    });
 
-    await setDoc(doc(db, "solved", closePostId.id), {
+    if (!postData) {
+        closeModal();
+        return;
+    }
+
+    await setDoc(doc(db, "solved", currentPostToClose), {
         ...postData,
         underProcessDate: postData.underProcessDate || new Date(),
         solvedDate: new Date(),
@@ -80,11 +92,9 @@ window.submitSolution = async function() {
     });
 
     await deleteDoc(postRef);
-    closePostId = null;
-    document.getElementById("solution-text").value = "";
     closeModal();
     listUnderProcess();
-    alert("Lezárva és áthelyezve a 'Megoldott' fülre.");
+    alert("A poszt sikeresen lezárva és áthelyezve a 'Megoldott' fülre.");
 };
 
 listUnderProcess();
