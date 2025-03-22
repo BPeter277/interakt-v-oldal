@@ -9,21 +9,30 @@
 <body class="light-mode">
     <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
     <h1>Posztok listázása</h1>
-    <label>Szűrés lájkok száma szerint minimum: <input type="number" id="min-likes" value="0"></label>
-    <button onclick="listPosts()">Szűrés</button>
+
+    <label>Téma szűrés: 
+        <select id="filter-topic">
+            <option value="all">Összes</option>
+        </select>
+    </label>
+    <br>
+    <label>Rendezés: 
+        <select id="sort-by">
+            <option value="date">Dátum szerint</option>
+            <option value="likes">Lájkok szerint</option>
+        </select>
+    </label>
+    <br>
+    <button onclick="listPosts()">Szűrés és rendezés</button>
+
     <div id="post-list"></div>
 
     <script type="module" src="list_posts.js"></script>
     <script>
     function toggleTheme() {
         const body = document.body;
-        if (body.classList.contains('light-mode')) {
-            body.classList.remove('light-mode');
-            body.classList.add('dark-mode');
-        } else {
-            body.classList.remove('dark-mode');
-            body.classList.add('light-mode');
-        }
+        body.classList.toggle('dark-mode');
+        body.classList.toggle('light-mode');
     }
     </script>
 </body>

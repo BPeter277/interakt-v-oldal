@@ -4,6 +4,7 @@
   --bg-color-dark: #1e1e1e;
   --text-color-dark: #f0f0f0;
   --primary-color: #4a90e2;
+  --like-active-color: #357abd;
 }
 
 body {
@@ -52,6 +53,10 @@ button {
 
 button:hover {
   background-color: #357abd;
+}
+
+.like-button.active {
+  background-color: var(--like-active-color) !important;
 }
 
 #admin-panel, #writer-panel, #user-panel {

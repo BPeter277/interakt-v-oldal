@@ -27,8 +27,10 @@
     <div id="writer-panel" style="display:none;">
         <h3>Új poszt létrehozása</h3>
         <input type="text" id="post-title" placeholder="Cím">
-        <input type="text" id="post-topic" placeholder="Téma">
         <textarea id="post-content" placeholder="Tartalom"></textarea>
+        <select id="post-topic">
+            <option disabled selected>Válassz témát</option>
+        </select>
         <button onclick="ujPoszt()">Poszt létrehozása</button>
     </div>
 
@@ -43,6 +45,10 @@
         </select>
         <button onclick="setUserRole()">Jogkör beállítása</button>
 
+        <h4>Téma hozzáadása</h4>
+        <input type="text" id="new-topic" placeholder="Új téma neve">
+        <button onclick="addTopic()">Téma hozzáadása</button>
+
         <h4>Felhasználók kezelése</h4>
         <button onclick="listUsers()">Összes regisztrált email megtekintése</button>
         <ul id="user-list"></ul>
@@ -50,6 +56,7 @@
 
     <br>
     <a href="post_list.html"><button>📄 Posztok listázása</button></a>
+    <a href="profile.html"><button>👤 Saját posztjaim</button></a>
 
     <script type="module" src="script.js"></script>
     <script>

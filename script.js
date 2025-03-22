@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc, updateDoc, increment, query, orderBy, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -52,13 +52,39 @@ window.jelszoModositas = async function() {
     }
 };
 
+async function betoltTemak() {
+    const temaSelect = document.getElementById("post-topic");
+    if (!temaSelect) return;
+    temaSelect.innerHTML = '<option disabled selected>Válassz témát</option>';
+    const snapshot = await getDocs(collection(db, "topics"));
+    snapshot.forEach((topicDoc) => {
+        const opt = document.createElement("option");
+        opt.value = topicDoc.id;
+        opt.innerText = topicDoc.id;
+        temaSelect.appendChild(opt);
+    });
+}
+
 window.ujPoszt = async function() {
     const title = document.getElementById("post-title").value;
     const content = document.getElementById("post-content").value;
     const topic = document.getElementById("post-topic").value;
+    if (!topic) return alert("Válassz témát a legördülő listából!");
     try {
-        await addDoc(collection(db, "posts"), { title, content, topic, author: auth.currentUser.email, date: new Date(), likes: 0 });
+        await addDoc(collection(db, "posts"), { title, content, topic, author: auth.currentUser.email, date: new Date(), likes: 0, likedBy: [] });
         alert("Poszt sikeresen létrehozva!");
+    } catch (error) {
+        alert("Hiba: " + error.message);
+    }
+};
+
+window.addTopic = async function() {
+    const newTopic = document.getElementById("new-topic").value;
+    if (!newTopic) return alert("Adj meg egy témanevet!");
+    try {
+        await setDoc(doc(db, "topics", newTopic), {});
+        alert("Új téma hozzáadva: " + newTopic);
+        betoltTemak();
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -106,6 +132,7 @@ onAuthStateChanged(auth, async (user) => {
         adminPanel.style.display = role === "admin" ? "block" : "none";
         writerPanel.style.display = (role === "writer" || role === "admin") ? "block" : "none";
         userPanel.style.display = "block";
+        betoltTemak();
     } else {
         udvozles.innerText = "Nem vagy bejelentkezve.";
         adminPanel.style.display = "none";
