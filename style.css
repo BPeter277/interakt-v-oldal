@@ -1,0 +1,23 @@
+body {
+    background-color: lightblue;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+}
+
+h1 {
+    color: darkblue;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+#mozgofelirat {
+    font-size: 18px;
+    color: red;
+    position: absolute;
+    pointer-events: none;
+}
