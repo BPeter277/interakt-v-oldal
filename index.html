@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bejelentkezés Firebase-el</title>
+    <title>Jogkörös Webapp Firebase-el</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Bejelentkezés / Regisztráció</h1>
-
     <input type="email" id="email" placeholder="Email cím">
     <input type="password" id="password" placeholder="Jelszó">
     <br>
@@ -16,7 +15,19 @@
     <button onclick="bejelentkez()">Bejelentkezés</button>
     <button onclick="kijelentkez()">Kijelentkezés</button>
 
-    <p id="felhasznalo-info"></p>
+    <h2 id="udvozles"></h2>
+
+    <div id="admin-panel" style="display:none;">
+        <h3>Admin felület</h3>
+        <input type="email" id="user-email" placeholder="Felhasználó email">
+        <select id="role-select">
+            <option value="user">User</option>
+            <option value="commenter">Commenter</option>
+            <option value="writer">Writer</option>
+            <option value="admin">Admin</option>
+        </select>
+        <button onclick="setUserRole()">Jogkör beállítása</button>
+    </div>
 
     <script type="module" src="script.js"></script>
 </body>

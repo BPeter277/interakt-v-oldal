@@ -27,3 +27,9 @@ button {
     margin-top: 20px;
     font-weight: bold;
 }
+
+#admin-panel {
+    margin-top: 30px;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+}
