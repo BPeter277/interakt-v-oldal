@@ -20,7 +20,7 @@ window.regisztral = async function() {
     const password = document.getElementById("password").value;
     try {
         await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, "users", email), { role: "user" });
+        await setDoc(doc(db, "users", email), { role: "writer" });
         alert("Sikeres regisztráció! Alap jogkör: user");
     } catch (error) {
         alert("Hiba: " + error.message);
