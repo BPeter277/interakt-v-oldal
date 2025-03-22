@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktív weboldal</title>
+    <title>Bejelentkezés Firebase-el</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Interaktív elemek bemutató</h1>
-    
-    <button onclick="hatterValtas()">Háttérszín váltás</button>
-    
-    <p id="titkos">Ez egy elrejtett üzenet!</p>
-    <button onclick="toggleSzoveg()">Mutat / Elrejt</button>
-    
-    <h2 id="mozgofelirat">Mozgó felirat</h2>
+    <h1>Bejelentkezés / Regisztráció</h1>
 
-    <script src="script.js"></script>
+    <input type="email" id="email" placeholder="Email cím">
+    <input type="password" id="password" placeholder="Jelszó">
+    <br>
+    <button onclick="regisztral()">Regisztráció</button>
+    <button onclick="bejelentkez()">Bejelentkezés</button>
+    <button onclick="kijelentkez()">Kijelentkezés</button>
+
+    <p id="felhasznalo-info"></p>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
