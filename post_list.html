@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posztok listája</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-mode">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
+    <h1>Posztok listázása</h1>
+    <label>Szűrés lájkok száma szerint minimum: <input type="number" id="min-likes" value="0"></label>
+    <button onclick="listPosts()">Szűrés</button>
+    <div id="post-list"></div>
+
+    <script type="module" src="list_posts.js"></script>
+    <script>
+    function toggleTheme() {
+        const body = document.body;
+        if (body.classList.contains('light-mode')) {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
+            body.classList.add('light-mode');
+        }
+    }
+    </script>
+</body>
+</html>
