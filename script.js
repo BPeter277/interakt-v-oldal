@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -18,10 +18,14 @@ const db = getFirestore(app);
 window.regisztral = async function() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    if (!email.endsWith("@uni-corvinus.hu") && !email.endsWith("@stud.uni-corvinus.hu")) {
+        return alert("Csak corvinusos e-mail címmel lehet regisztrálni.");
+    }
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", email), { role: "writer" });
-        alert("Sikeres regisztráció! Alap jogkör: writer");
+        await userCredential.user.sendEmailVerification();
+        alert("Sikeres regisztráció! Ellenőrizd az emailt a visszaigazoláshoz.");
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -31,7 +35,11 @@ window.bejelentkez = async function() {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (!userCredential.user.emailVerified) {
+            signOut(auth);
+            return alert("Először erősítsd meg az email-címedet az emailben küldött linkkel!");
+        }
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -43,10 +51,10 @@ window.kijelentkez = function() {
 
 window.elfelejtettJelszo = async function() {
     const email = document.getElementById("email").value;
-    if (!email) return alert("Kérlek add meg az email címed!");
+    if (!email) return alert("Kérlek add meg az email címedet!");
     try {
         await sendPasswordResetEmail(auth, email);
-        alert("Jelszó visszaállítási email elküldve!");
+        alert("Jelszó-visszaállítási email elküldve!");
     } catch (error) {
         alert("Hiba: " + error.message);
     }
@@ -77,31 +85,53 @@ window.ujPoszt = async function() {
 onAuthStateChanged(auth, async (user) => {
     const authPanel = document.getElementById("auth-panel");
     const logoutBtn = document.getElementById("logout-btn");
+    const passwordChangeBtn = document.getElementById("password-change-btn");
     const adminPanel = document.getElementById("admin-panel");
     const writerPanel = document.getElementById("writer-panel");
     const navButtons = document.getElementById("nav-buttons");
     const welcomeText = document.getElementById("welcome-text");
+    const emailDisplay = document.getElementById("user-email-display");
+
     if (user) {
         document.body.classList.remove('before-login');
-        document.body.classList.add('light-mode');
         authPanel.style.display = "none";
         logoutBtn.style.display = "block";
-        adminPanel.style.display = "none";
-        writerPanel.style.display = "none";
+        passwordChangeBtn.style.display = "block";
         navButtons.style.display = "block";
+        emailDisplay.innerText = `Bejelentkezve: ${user.email}`;
+        welcomeText.style.display = "none";
+
         const userDoc = await getDoc(doc(db, "users", user.email));
         const role = userDoc.exists() ? userDoc.data().role : "user";
         if (role === "admin") adminPanel.style.display = "block";
-        if (role === "writer" || role === "admin") writerPanel.style.display = "block";
-        welcomeText.style.display = "none";
+        if (role === "writer" || role === "admin" || role === "hokos") writerPanel.style.display = "block";
+
         betoltTemak();
     } else {
         document.body.classList.add('before-login');
         authPanel.style.display = "block";
         logoutBtn.style.display = "none";
+        passwordChangeBtn.style.display = "none";
         adminPanel.style.display = "none";
         writerPanel.style.display = "none";
         navButtons.style.display = "none";
+        emailDisplay.innerText = "";
         welcomeText.style.display = "block";
     }
 });
+
+window.showUserListModal = async function() {
+    const userList = document.getElementById("user-list-scrollable");
+    userList.innerHTML = "";
+    const snapshot = await getDocs(collection(db, "users"));
+    snapshot.forEach((docu) => {
+        const li = document.createElement("li");
+        li.textContent = `${docu.id} (Jogkör: ${docu.data().role})`;
+        userList.appendChild(li);
+    });
+    document.getElementById("user-list-modal").style.display = "block";
+};
+
+window.closeUserListModal = function() {
+    document.getElementById("user-list-modal").style.display = "none";
+};

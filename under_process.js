@@ -52,7 +52,8 @@ async function listUnderProcess() {
                 <p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
                 <p><strong>Lájkok:</strong> ${data.likes || 0}</p>
                 ${(currentUserRole === "admin" || currentUserRole === "hokos") 
-                    ? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button>` 
+                    ? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button> 
+                       <button onclick="returnToList('${post.id}')">Visszatesz</button>`
                     : ""}
             `;
             container.appendChild(div);
@@ -75,9 +76,9 @@ window.submitSolution = async function() {
     if (!solutionText || !currentPostToClose) return alert("Írj be megoldási szöveget!");
     
     const postRef = doc(db, "posts", currentPostToClose);
-    const postDoc = await getDocs(collection(db, "posts"));
+    const postSnapshot = await getDocs(collection(db, "posts"));
     let postData = null;
-    postDoc.forEach((p) => {
+    postSnapshot.forEach((p) => {
         if (p.id === currentPostToClose) {
             postData = p.data();
         }
@@ -99,6 +100,12 @@ window.submitSolution = async function() {
     closeModal();
     listUnderProcess();
     alert("A poszt sikeresen lezárva és áthelyezve a 'Megoldott' fülre.");
+};
+
+window.returnToList = async function(postId) {
+    await updateDoc(doc(db, "posts", postId), { underProcess: false });
+    alert("A poszt visszakerült a listázásba.");
+    listUnderProcess();
 };
 
 listUnderProcess();
