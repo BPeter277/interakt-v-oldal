@@ -83,6 +83,22 @@ window.ujPoszt = async function() {
     alert("Poszt sikeresen létrehozva!");
 };
 
+window.setUserRole = async function() {
+    const userEmail = document.getElementById("user-email").value;
+    const selectedRole = document.getElementById("role-select").value;
+
+    if (!userEmail || !selectedRole) {
+        return alert("Add meg az email címet és válaszd ki a jogkört!");
+    }
+
+    try {
+        await setDoc(doc(db, "users", userEmail), { role: selectedRole });
+        alert(`Jogkör beállítva: ${userEmail} -> ${selectedRole}`);
+    } catch (error) {
+        alert("Hiba a jogkör állítás során: " + error.message);
+    }
+};
+
 onAuthStateChanged(auth, async (user) => {
     const authPanel = document.getElementById("auth-panel");
     const logoutBtn = document.getElementById("logout-btn");
