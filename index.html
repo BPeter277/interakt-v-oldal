@@ -28,6 +28,7 @@
     <div id="writer-panel" style="display:none;">
         <h3>Új poszt létrehozása</h3>
         <input type="text" id="post-title" placeholder="Cím">
+        <input type="text" id="post-topic" placeholder="Téma">
         <textarea id="post-content" placeholder="Tartalom"></textarea>
         <button onclick="ujPoszt()">Poszt létrehozása</button>
     </div>
@@ -48,17 +49,15 @@
         <ul id="user-list"></ul>
     </div>
 
+    <br>
+    <a href="post_list.html"><button>📄 Posztok listázása</button></a>
+
     <script type="module" src="script.js"></script>
     <script>
     function toggleTheme() {
         const body = document.body;
-        if (body.classList.contains('light-mode')) {
-            body.classList.remove('light-mode');
-            body.classList.add('dark-mode');
-        } else {
-            body.classList.remove('dark-mode');
-            body.classList.add('light-mode');
-        }
+        body.classList.toggle('dark-mode');
+        body.classList.toggle('light-mode');
     }
     </script>
 </body>
