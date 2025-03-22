@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, addDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -16,7 +16,106 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Regisztráció, bejelentkezés, jelszómódosítás, posztolás, admin funkciók, user listázás
-// (Kód többi része változatlan marad; ha szükséges, a teljes verziót is generálhatom)
+window.regisztral = async function() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", email), { role: "user" });
+        alert("Sikeres regisztráció! Alap jogkör: user");
+    } catch (error) {
+        console.error("Regisztráció hiba:", error);
+        alert("Hiba: " + error.message);
+    }
+};
 
-// További kódot kérésre hozzá tudok csatolni.
+window.bejelentkez = async function() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Sikeres bejelentkezés!");
+    } catch (error) {
+        console.error("Bejelentkezés hiba:", error);
+        alert("Hiba: " + error.message);
+    }
+};
+
+window.kijelentkez = function() {
+    signOut(auth).then(() => alert("Kijelentkeztél!"));
+};
+
+window.jelszoModositas = async function() {
+    const newPassword = document.getElementById("new-password").value;
+    try {
+        await updatePassword(auth.currentUser, newPassword);
+        alert("Jelszó sikeresen módosítva!");
+    } catch (error) {
+        console.error("Jelszómódosítás hiba:", error);
+        alert("Hiba: " + error.message);
+    }
+};
+
+window.ujPoszt = async function() {
+    const title = document.getElementById("post-title").value;
+    const content = document.getElementById("post-content").value;
+    const topic = document.getElementById("post-topic")?.value || "Általános";
+    try {
+        await addDoc(collection(db, "posts"), { title, content, topic, author: auth.currentUser.email, date: new Date(), likes: 0 });
+        alert("Poszt sikeresen létrehozva!");
+    } catch (error) {
+        console.error("Poszt létrehozás hiba:", error);
+        alert("Hiba: " + error.message);
+    }
+};
+
+window.setUserRole = async function() {
+    const userEmail = document.getElementById("user-email").value;
+    const selectedRole = document.getElementById("role-select").value;
+    try {
+        await setDoc(doc(db, "users", userEmail), { role: selectedRole });
+        alert("Jogkör sikeresen beállítva: " + selectedRole);
+    } catch (error) {
+        console.error("Jogkör beállítás hiba:", error);
+        alert("Hiba: " + error.message);
+    }
+};
+
+window.listUsers = async function() {
+    const userList = document.getElementById("user-list");
+    userList.innerHTML = "";
+    const snapshot = await getDocs(collection(db, "users"));
+    snapshot.forEach((docu) => {
+        const li = document.createElement("li");
+        li.textContent = `${docu.id} (role: ${docu.data().role}) `;
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Törlés";
+        deleteBtn.onclick = async () => {
+            await deleteDoc(doc(db, "users", docu.id));
+            alert(`Törölve: ${docu.id}`);
+            listUsers();
+        };
+        li.appendChild(deleteBtn);
+        userList.appendChild(li);
+    });
+};
+
+onAuthStateChanged(auth, async (user) => {
+    const udvozles = document.getElementById("udvozles");
+    const adminPanel = document.getElementById("admin-panel");
+    const writerPanel = document.getElementById("writer-panel");
+    const userPanel = document.getElementById("user-panel");
+    if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.email));
+        const role = userDoc.exists() ? userDoc.data().role : "user";
+        udvozles.innerText = `Bejelentkezve mint: ${user.email} (Jogkör: ${role})`;
+        adminPanel.style.display = role === "admin" ? "block" : "none";
+        writerPanel.style.display = (role === "writer" || role === "admin") ? "block" : "none";
+        userPanel.style.display = "block";
+    } else {
+        udvozles.innerText = "Nem vagy bejelentkezve.";
+        adminPanel.style.display = "none";
+        writerPanel.style.display = "none";
+        userPanel.style.display = "none";
+    }
+});
