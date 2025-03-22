@@ -17,6 +17,19 @@
 
     <h2 id="udvozles"></h2>
 
+    <div id="user-panel" style="display:none;">
+        <h3>Jelszó módosítása</h3>
+        <input type="password" id="new-password" placeholder="Új jelszó">
+        <button onclick="jelszoModositas()">Jelszó módosítása</button>
+    </div>
+
+    <div id="writer-panel" style="display:none;">
+        <h3>Új poszt létrehozása</h3>
+        <input type="text" id="post-title" placeholder="Cím">
+        <textarea id="post-content" placeholder="Tartalom"></textarea>
+        <button onclick="ujPoszt()">Poszt létrehozása</button>
+    </div>
+
     <div id="admin-panel" style="display:none;">
         <h3>Admin felület</h3>
         <input type="email" id="user-email" placeholder="Felhasználó email">
@@ -27,6 +40,10 @@
             <option value="admin">Admin</option>
         </select>
         <button onclick="setUserRole()">Jogkör beállítása</button>
+
+        <h4>Felhasználók kezelése</h4>
+        <button onclick="listUsers()">Összes regisztrált email megtekintése</button>
+        <ul id="user-list"></ul>
     </div>
 
     <script type="module" src="script.js"></script>

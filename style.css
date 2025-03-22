@@ -9,11 +9,12 @@ h1 {
     color: #333366;
 }
 
-input {
+input, textarea {
     display: block;
     margin: 10px auto;
     padding: 10px;
     font-size: 16px;
+    width: 80%;
 }
 
 button {
@@ -23,13 +24,13 @@ button {
     cursor: pointer;
 }
 
-#felhasznalo-info {
-    margin-top: 20px;
-    font-weight: bold;
-}
-
-#admin-panel {
+#admin-panel, #writer-panel, #user-panel {
     margin-top: 30px;
     border-top: 1px solid #ccc;
     padding-top: 20px;
+}
+
+ul#user-list {
+    list-style-type: none;
+    padding: 0;
 }
