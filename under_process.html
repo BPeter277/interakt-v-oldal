@@ -11,6 +11,15 @@
     <h1>Ügyintézés alatt lévő posztok</h1>
     <div id="under-process-list"></div>
 
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <textarea id="solution-text" placeholder="Írd be a megoldás szövegét..."></textarea>
+            <br>
+            <button onclick="submitSolution()">Kész</button>
+            <button onclick="closeModal()">Mégse</button>
+        </div>
+    </div>
+
     <script type="module" src="under_process.js"></script>
     <script>
     function toggleTheme() {

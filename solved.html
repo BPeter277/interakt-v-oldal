@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megoldott posztok</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-mode">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
+    <h1>Megoldott posztok</h1>
+    <div id="solved-list"></div>
+
+    <script type="module" src="solved.js"></script>
+    <script>
+    function toggleTheme() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
+        body.classList.toggle('light-mode');
+    }
+    </script>
+</body>
+</html>
