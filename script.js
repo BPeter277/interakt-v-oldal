@@ -40,6 +40,8 @@ window.bejelentkez = async function() {
     if (!userCredential.user.emailVerified) {
       await signOut(auth);
       return alert("Először erősítsd meg az email-címedet a kapott linkkel!");
+    } else {
+      window.location.href = "dashboard.html"; // belépés után a főoldal
     }
   } catch (error) {
     alert("Hiba: " + error.message);
@@ -149,14 +151,14 @@ onAuthStateChanged(auth, async (user) => {
     backBtn.style.display = user && user.emailVerified ? "block" : "none";
   }
 
-  // Minden oldal bal felső sarkában jelenjen meg a vissza gomb, ha be van jelentkezve
-  if (user && user.emailVerified) {
+  // Bejelentkezés előtt ne jelenjen meg a főoldalra vissza gomb.
+  if (user && user.emailVerified && window.location.pathname !== "/dashboard.html") {
     const backButton = document.createElement("button");
     backButton.textContent = "🏠 Főoldal";
     backButton.style.position = "fixed";
     backButton.style.top = "5px";
     backButton.style.left = "5px";
-    backButton.onclick = () => window.location.href = "index.html";
+    backButton.onclick = () => window.location.href = "dashboard.html";
     document.body.appendChild(backButton);
   }
 });
