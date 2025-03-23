@@ -46,16 +46,17 @@ async function listUnderProcess() {
             const div = document.createElement("div");
             div.className = "post-card";
             div.innerHTML = `
-                <h3>${data.title}</h3>
-                <p>${data.content}</p>
-                <p><strong>Téma:</strong> ${data.topic}</p>
-                <p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
-                <p><strong>Lájkok:</strong> ${data.likes || 0}</p>
-                ${(currentUserRole === "admin" || currentUserRole === "hokos") 
-                    ? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button> 
-                       <button onclick="returnToList('${post.id}')">Visszatesz</button>`
-                    : ""}
-            `;
+    		<h3>${data.title}</h3>
+    		<p>${data.content}</p>
+    		<p><strong>Téma:</strong> ${data.topic}</p>
+    		<p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
+    		<p><strong>Lájkok:</strong> ${data.likes || 0}</p>
+    		${(currentUserRole === "admin" || currentUserRole === "hokos") 
+        		? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button>
+           		<button onclick="returnToList('${post.id}')">Visszatesz</button>
+           	${(currentUserRole === "admin") ? `<button onclick="deleteUnderProcessPost('${post.id}')">🗑 Törlés</button>` : ""}` 
+        	: ""}
+`;
             container.appendChild(div);
         }
     });
@@ -106,6 +107,14 @@ window.returnToList = async function(postId) {
     await updateDoc(doc(db, "posts", postId), { underProcess: false });
     alert("A poszt visszakerült a listázásba.");
     listUnderProcess();
+};
+
+window.deleteUnderProcessPost = async function(postId) {
+    if (confirm("Biztosan törölni szeretnéd ezt az ügyintézés alatt lévő posztot?")) {
+        await deleteDoc(doc(db, "posts", postId));
+        alert("Poszt törölve.");
+        listUnderProcess();
+    }
 };
 
 listUnderProcess();

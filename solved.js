@@ -25,17 +25,26 @@ async function listSolved() {
         const div = document.createElement("div");
         div.className = "post-card";
         div.innerHTML = `
-            <h3>${data.title}</h3>
-            <p>${data.content}</p>
-            <p><strong>Téma:</strong> ${data.topic}</p>
-            <p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
-            <p><small>Ügyintézés kezdete: ${data.underProcessDate ? new Date(data.underProcessDate.seconds * 1000).toLocaleString() : "N/A"}</small></p>
-            <p><small>Lezárás dátuma: ${data.solvedDate ? new Date(data.solvedDate.seconds * 1000).toLocaleString() : "N/A"}</small></p>
-            <p><strong>Megoldás szövege:</strong> ${data.solution || "Nincs megadva"}</p>
-            <p><strong>Lájkok száma:</strong> ${data.likes || 0}</p>
-        `;
+    		<h3>${data.title}</h3>
+    		<p>${data.content}</p>
+    		<p><strong>Téma:</strong> ${data.topic}</p>
+    		<p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
+    		<p><small>Ügyintézés kezdete: ${data.underProcessDate ? new Date(data.underProcessDate.seconds * 1000).toLocaleString() : "N/A"}</small></p>
+    		<p><small>Lezárás dátuma: ${data.solvedDate ? new Date(data.solvedDate.seconds * 1000).toLocaleString() : "N/A"}</small></p>
+    		<p><strong>Megoldás szövege:</strong> ${data.solution || "Nincs megadva"}</p>
+    		<p><strong>Lájkok száma:</strong> ${data.likes || 0}</p>
+    		${(currentUserRole === "admin") ? `<button onclick="deleteSolvedPost('${post.id}')">🗑 Törlés</button>` : ""}
+	`;
         container.appendChild(div);
     });
 }
+
+window.deleteSolvedPost = async function(postId) {
+    if (confirm("Biztosan törölni szeretnéd ezt a lezárt posztot?")) {
+        await deleteDoc(doc(db, "solved", postId));
+        alert("Lezárt poszt törölve.");
+        listSolved();
+    }
+};
 
 listSolved();
