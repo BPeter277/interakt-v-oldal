@@ -1,6 +1,5 @@
-// profile.js - frissített változat
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -17,43 +16,29 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    loadUserPosts(user.email);
-  } else {
-    document.getElementById("profile-post-list").innerHTML = "Jelentkezz be a saját posztjaid megtekintéséhez.";
-  }
+    if (user) {
+        const postList = document.getElementById("own-post-list");
+        postList.innerHTML = "<h3>Betöltés...</h3>";
+        const q = query(collection(db, "posts"), orderBy("date", "desc"));
+        const snapshot = await getDocs(q);
+
+        postList.innerHTML = "";
+        snapshot.forEach((post) => {
+            const data = post.data();
+            if (data.author === user.email) {
+                const div = document.createElement("div");
+                div.className = "post-card";
+                div.innerHTML = `
+                    <h3>${data.title}</h3>
+                    <p>${data.content}</p>
+                    <p><strong>Téma:</strong> ${data.topic}</p>
+                    <p><small>Közzétéve: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
+                    <p><strong>Lájkok:</strong> ${data.likes || 0}</p>
+                `;
+                postList.appendChild(div);
+            }
+        });
+    } else {
+        document.getElementById("own-post-list").innerHTML = "<p>Bejelentkezés szükséges a saját posztjaid megtekintéséhez.</p>";
+    }
 });
-
-async function loadUserPosts(email) {
-  const postListDiv = document.getElementById("profile-post-list");
-  postListDiv.innerHTML = "";
-
-  const q = query(collection(db, "posts"), where("author", "==", email));
-  const snapshot = await getDocs(q);
-
-  snapshot.forEach((docu) => {
-    const post = docu.data();
-    const div = document.createElement("div");
-    div.classList.add("post-item");
-    div.innerHTML = `
-      <h3>${post.title}</h3>
-      <p>${post.content}</p>
-      <p><strong>Téma:</strong> ${post.topic}</p>
-      <p><strong>Közzétéve:</strong> ${new Date(post.date.seconds * 1000).toLocaleString()}</p>
-      <p><strong>Lájkok száma:</strong> ${post.likes}</p>
-    `;
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Törlés";
-    deleteBtn.onclick = async () => {
-      if (confirm("Biztosan törlöd ezt a saját posztodat?")) {
-        await deleteDoc(doc(db, "posts", docu.id));
-        alert("Poszt törölve.");
-        loadUserPosts(email);
-      }
-    };
-    div.appendChild(deleteBtn);
-
-    postListDiv.appendChild(div);
-  });
-}

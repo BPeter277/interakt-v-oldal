@@ -3,44 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📄 Posztok listázása</title>
+    <title>Posztok listája</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        #back-to-main {
-            position: fixed;
-            top: 30px;
-            left: 10px;
-            font-size: 14px;
-            background-color: #f0f0f0;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-    </style>
 </head>
-<body>
-    <div id="user-email-display"></div>
-    <button id="back-to-main" onclick="location.href='index.html'">🏠 Vissza a főoldalra</button>
-
+<body class="light-mode">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
     <h1>Posztok listázása</h1>
-    <div id="post-filters">
-        <label for="topic-filter">Szűrés téma szerint:</label>
-        <select id="topic-filter">
-            <option value="">Összes téma</option>
-        </select>
 
-        <label for="sort-filter">Rendezés:</label>
-        <select id="sort-filter">
-            <option value="likes">Lájkok száma szerint</option>
-            <option value="date">Közzététel dátuma szerint</option>
+    <label>Téma szűrés: 
+        <select id="filter-topic">
+            <option value="all">Összes</option>
         </select>
-
-        <button onclick="loadPosts()">Szűrés és rendezés</button>
-    </div>
+    </label>
+    <br>
+    <label>Rendezés: 
+        <select id="sort-by">
+            <option value="date">Dátum szerint</option>
+            <option value="likes">Lájkok szerint</option>
+        </select>
+    </label>
+    <br>
+    <button onclick="listPosts()">Szűrés és rendezés</button>
 
     <div id="post-list"></div>
 
     <script type="module" src="list_posts.js"></script>
+    <script>
+    function toggleTheme() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
+        body.classList.toggle('light-mode');
+    }
+    </script>
 </body>
 </html>

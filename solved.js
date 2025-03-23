@@ -1,6 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -13,54 +12,30 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
-async function loadSolvedPosts() {
-  const postListDiv = document.getElementById("solved-list");
-  postListDiv.innerHTML = "";
-  const snapshot = await getDocs(collection(db, "solved"));
+async function listSolved() {
+    const container = document.getElementById("solved-list");
+    container.innerHTML = "<h3>Betöltés...</h3>";
+    const q = query(collection(db, "solved"), orderBy("solvedDate", "desc"));
+    const snapshot = await getDocs(q);
 
-  const user = auth.currentUser;
-  let role = "user";
-
-  if (user) {
-    const userDoc = await getDoc(doc(db, "users", user.email));
-    if (userDoc.exists()) {
-      role = userDoc.data().role;
-    }
-  }
-
-  snapshot.forEach((docu) => {
-    const post = docu.data();
-    const div = document.createElement("div");
-    div.classList.add("post-item");
-    div.innerHTML = `
-      <h3>${post.title}</h3>
-      <p>${post.content}</p>
-      <p><strong>Téma:</strong> ${post.topic}</p>
-      <p><strong>Kiírás dátuma:</strong> ${new Date(post.date.seconds * 1000).toLocaleString()}</p>
-      <p><strong>Ügyintézés alá helyezés dátuma:</strong> ${new Date(post.underProcessDate.seconds * 1000).toLocaleString()}</p>
-      <p><strong>Lezárás dátuma:</strong> ${new Date(post.closedDate.seconds * 1000).toLocaleString()}</p>
-      <p><strong>Megoldás leírása:</strong> ${post.solutionText}</p>
-    `;
-
-    if (role === "admin") {
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Törlés";
-      deleteBtn.onclick = async () => {
-        if (confirm("Biztosan törlöd ezt a posztot?")) {
-          await deleteDoc(doc(db, "solved", docu.id));
-          alert("Poszt törölve.");
-          loadSolvedPosts();
-        }
-      };
-      div.appendChild(deleteBtn);
-    }
-
-    postListDiv.appendChild(div);
-  });
+    container.innerHTML = "";
+    snapshot.forEach((post) => {
+        const data = post.data();
+        const div = document.createElement("div");
+        div.className = "post-card";
+        div.innerHTML = `
+            <h3>${data.title}</h3>
+            <p>${data.content}</p>
+            <p><strong>Téma:</strong> ${data.topic}</p>
+            <p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
+            <p><small>Ügyintézés kezdete: ${data.underProcessDate ? new Date(data.underProcessDate.seconds * 1000).toLocaleString() : "N/A"}</small></p>
+            <p><small>Lezárás dátuma: ${data.solvedDate ? new Date(data.solvedDate.seconds * 1000).toLocaleString() : "N/A"}</small></p>
+            <p><strong>Megoldás szövege:</strong> ${data.solution || "Nincs megadva"}</p>
+            <p><strong>Lájkok száma:</strong> ${data.likes || 0}</p>
+        `;
+        container.appendChild(div);
+    });
 }
 
-onAuthStateChanged(auth, (user) => {
-  if (user && user.emailVerified) loadSolvedPosts();
-});
+listSolved();

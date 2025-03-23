@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -15,49 +15,97 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-async function loadUnderProcessPosts() {
-  const postListDiv = document.getElementById("under-process-list");
-  postListDiv.innerHTML = "";
-  const snapshot = await getDocs(collection(db, "under_process"));
+let currentUser = null;
+let currentUserRole = "user";
+let currentPostToClose = null;
 
-  const user = auth.currentUser;
-  let role = "user";
-
-  if (user) {
-    const userDoc = await getDoc(doc(db, "users", user.email));
-    if (userDoc.exists()) {
-      role = userDoc.data().role;
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        document.getElementById("user-email-display").innerText = `Bejelentkezve: ${user.email}`;
+        const users = await getDocs(collection(db, "users"));
+        users.forEach((docu) => {
+            if (docu.id === user.email) {
+                currentUserRole = docu.data().role;
+            }
+        });
+        listUnderProcess();
     }
-  }
+});
 
-  snapshot.forEach((docu) => {
-    const post = docu.data();
-    const div = document.createElement("div");
-    div.classList.add("post-item");
-    div.innerHTML = `
-      <h3>${post.title}</h3>
-      <p>${post.content}</p>
-      <p><strong>Téma:</strong> ${post.topic}</p>
-      <p><strong>Áthelyezve ügyintézésre:</strong> ${new Date(post.underProcessDate.seconds * 1000).toLocaleString()}</p>
-    `;
+async function listUnderProcess() {
+    const container = document.getElementById("under-process-list");
+    container.innerHTML = "<h3>Betöltés...</h3>";
+    const q = query(collection(db, "posts"), orderBy("date", "desc"));
+    const snapshot = await getDocs(q);
 
-    if (role === "admin") {
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Törlés";
-      deleteBtn.onclick = async () => {
-        if (confirm("Biztosan törlöd ezt a posztot?")) {
-          await deleteDoc(doc(db, "under_process", docu.id));
-          alert("Poszt törölve.");
-          loadUnderProcessPosts();
+    container.innerHTML = "";
+    snapshot.forEach((post) => {
+        const data = post.data();
+        if (data.underProcess) {
+            const div = document.createElement("div");
+            div.className = "post-card";
+            div.innerHTML = `
+                <h3>${data.title}</h3>
+                <p>${data.content}</p>
+                <p><strong>Téma:</strong> ${data.topic}</p>
+                <p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
+                <p><strong>Lájkok:</strong> ${data.likes || 0}</p>
+                ${(currentUserRole === "admin" || currentUserRole === "hokos") 
+                    ? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button> 
+                       <button onclick="returnToList('${post.id}')">Visszatesz</button>`
+                    : ""}
+            `;
+            container.appendChild(div);
         }
-      };
-      div.appendChild(deleteBtn);
-    }
-
-    postListDiv.appendChild(div);
-  });
+    });
 }
 
-onAuthStateChanged(auth, (user) => {
-  if (user && user.emailVerified) loadUnderProcessPosts();
-});
+window.openSolutionModal = function(postId) {
+    currentPostToClose = postId;
+    document.getElementById("modal").style.display = "block";
+};
+
+window.closeModal = function() {
+    document.getElementById("modal").style.display = "none";
+    document.getElementById("solution-text").value = "";
+};
+
+window.submitSolution = async function() {
+    const solutionText = document.getElementById("solution-text").value;
+    if (!solutionText || !currentPostToClose) return alert("Írj be megoldási szöveget!");
+    
+    const postRef = doc(db, "posts", currentPostToClose);
+    const postSnapshot = await getDocs(collection(db, "posts"));
+    let postData = null;
+    postSnapshot.forEach((p) => {
+        if (p.id === currentPostToClose) {
+            postData = p.data();
+        }
+    });
+
+    if (!postData) {
+        closeModal();
+        return;
+    }
+
+    await setDoc(doc(db, "solved", currentPostToClose), {
+        ...postData,
+        underProcessDate: postData.underProcessDate || new Date(),
+        solvedDate: new Date(),
+        solution: solutionText
+    });
+
+    await deleteDoc(postRef);
+    closeModal();
+    listUnderProcess();
+    alert("A poszt sikeresen lezárva és áthelyezve a 'Megoldott' fülre.");
+};
+
+window.returnToList = async function(postId) {
+    await updateDoc(doc(db, "posts", postId), { underProcess: false });
+    alert("A poszt visszakerült a listázásba.");
+    listUnderProcess();
+};
+
+listUnderProcess();

@@ -3,30 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👤 Saját posztjaim</title>
+    <title>Saját posztjaim</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        #back-to-main {
-            position: fixed;
-            top: 30px;
-            left: 10px;
-            font-size: 14px;
-            background-color: #f0f0f0;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-    </style>
 </head>
-<body>
-    <div id="user-email-display"></div>
-    <button id="back-to-main" onclick="location.href='index.html'">🏠 Vissza a főoldalra</button>
-
+<body class="light-mode">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
     <h1>Saját posztjaim</h1>
-    <div id="profile-post-list"></div>
+    <div id="own-post-list"></div>
 
     <script type="module" src="profile.js"></script>
+    <script>
+    function toggleTheme() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
+        body.classList.toggle('light-mode');
+    }
+    </script>
 </body>
 </html>
-
