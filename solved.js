@@ -12,7 +12,25 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
+let currentUser = null;
+let currentUserRole = "user";
+let currentPostToClose = null;
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        document.getElementById("user-email-display").innerText = `Bejelentkezve: ${user.email}`;
+        const users = await getDocs(collection(db, "users"));
+        users.forEach((docu) => {
+            if (docu.id === user.email) {
+                currentUserRole = docu.data().role;
+            }
+        });
+        listSolved();
+    }
+});
 async function listSolved() {
     const container = document.getElementById("solved-list");
     container.innerHTML = "<h3>Betöltés...</h3>";
