@@ -61,6 +61,35 @@ window.elfelejtettJelszo = async function() {
     }
 };
 
+async function betoltTemakTorleshez() {
+    const deleteSelect = document.getElementById("delete-topic-select");
+    if (!deleteSelect) return;
+    deleteSelect.innerHTML = '<option disabled selected>Válassz törlendő témát</option>';
+    const snapshot = await getDocs(collection(db, "topics"));
+    snapshot.forEach((topicDoc) => {
+        const opt = document.createElement("option");
+        opt.value = topicDoc.id;
+        opt.innerText = topicDoc.id;
+        deleteSelect.appendChild(opt);
+    });
+}
+
+window.torolTemat = async function() {
+    const selectedTopic = document.getElementById("delete-topic-select").value;
+    if (!selectedTopic) return alert("Válassz egy témát a törléshez!");
+
+    if (confirm(`Biztosan törölni szeretnéd a(z) ${selectedTopic} témát?`)) {
+        try {
+            await deleteDoc(doc(db, "topics", selectedTopic));
+            alert("A téma törölve!");
+            betoltTemakTorleshez();
+            betoltTemak();
+        } catch (error) {
+            alert("Hiba a törlés során: " + error.message);
+        }
+    }
+};
+
 async function betoltTemak() {
     const temaSelect = document.getElementById("post-topic");
     if (!temaSelect) return;
