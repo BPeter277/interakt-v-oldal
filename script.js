@@ -124,6 +124,7 @@ onAuthStateChanged(auth, async (user) => {
     const logoutBtn = document.getElementById("logout-btn");
     const passwordChangeBtn = document.getElementById("password-change-btn");
     const adminPanel = document.getElementById("admin-panel");
+    const hokosPanel = document.getElementById("hokos-panel");
     const writerPanel = document.getElementById("writer-panel");
     const navButtons = document.getElementById("nav-buttons");
     const welcomeText = document.getElementById("welcome-text");
@@ -142,6 +143,7 @@ onAuthStateChanged(auth, async (user) => {
         const role = userDoc.exists() ? userDoc.data().role : "user";
         if (role === "admin") adminPanel.style.display = "block";
         if (role === "writer" || role === "admin" || role === "hokos") writerPanel.style.display = "block";
+	if (role === "hokos") hokosPanel.style.display = "block";
 
         betoltTemak();
     } else {
