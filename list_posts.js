@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, increment, query, orderBy, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, increment, query, orderBy, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -56,6 +56,8 @@ window.listPosts = async function() {
     const snapshot = await getDocs(q);
     snapshot.forEach((post) => {
         const data = post.data();
+        const postId = post.id;
+
         if (!data.underProcess && (topicFilter === "all" || data.topic === topicFilter)) {
             const div = document.createElement("div");
             div.className = "post-card";
@@ -66,11 +68,11 @@ window.listPosts = async function() {
                 <p><strong>Téma:</strong> ${data.topic}</p>
                 <p><small>Közzétéve: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
                 <p><strong>Lájkok:</strong> ${data.likes || 0}</p>
-                <button class="like-button ${liked ? "active" : ""}" onclick="toggleLike('${post.id}', ${liked})">
+                <button class="like-button ${liked ? "active" : ""}" onclick="toggleLike('${postId}', ${liked})">
                     ${liked ? "Visszavonás 👎" : "Lájk 👍"}
                 </button>
-                ${(currentUserRole === "admin" || currentUserRole === "hokos") ? `<button onclick="markUnderProcess('${post.id}')">Ügyintézés alá vonás</button>` : ""}
-                ${(currentUserRole === "admin" || data.author === currentUserEmail) ? `<button onclick="deletePost('${post.id}')">🗑 Törlés</button>` : ""}
+                ${(currentUserRole === "admin" || currentUserRole === "hokos") ? `<button onclick="markUnderProcess('${postId}')">Ügyintézés alá vonás</button>` : ""}
+                ${(currentUserRole === "admin" || data.author === currentUserEmail) ? `<button onclick="deletePost('${postId}')">🗑 Törlés</button>` : ""}
             `;
             postList.appendChild(div);
         }
@@ -101,11 +103,16 @@ window.markUnderProcess = async function(postId) {
 };
 
 window.deletePost = async function(postId) {
+    console.log("Törlésre kijelölt postId:", postId);
     if (confirm("Biztosan törölni szeretnéd ezt a posztot?")) {
-        await deleteDoc(doc(db, "posts", postId));
-        alert("Poszt törölve.");
-        listPosts();
+        try {
+            await deleteDoc(doc(db, "posts", postId));
+            alert("Poszt törölve.");
+            listPosts();
+        } catch (error) {
+            console.error("Hiba a törlés során:", error);
+            alert("Hiba történt a törlés közben: " + error.message);
+        }
     }
 };
 
-listPosts();
