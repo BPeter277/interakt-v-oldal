@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendEmailVerification, sendPasswordResetEmail, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -16,18 +16,16 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 window.regisztral = async function() {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
     if (!email.endsWith("@uni-corvinus.hu") && !email.endsWith("@stud.uni-corvinus.hu")) {
-        return alert("Csak corvinusos e-mail címmel lehet regisztrálni.");
+        return alert("Nem megfelelő email formátum! Csak corvinusos e-mail címmel lehet regisztrálni.");
     }
-
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await setDoc(doc(db, "users", email), { role: "writer" });
         await sendEmailVerification(userCredential.user);
-        alert("Sikeres regisztráció! Erősítsd meg az email címedet.");
+        alert("Sikeres regisztráció! Kérlek, erősítsd meg az email-címedet a kiküldött levélben.");
         await signOut(auth);
     } catch (error) {
         alert("Hiba: " + error.message);
@@ -35,14 +33,13 @@ window.regisztral = async function() {
 };
 
 window.bejelentkez = async function() {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         if (!userCredential.user.emailVerified) {
             await signOut(auth);
-            return alert("Először erősítsd meg az email-címedet!");
+            return alert("Először erősítsd meg az email-címedet az emailben kapott link segítségével!");
         }
     } catch (error) {
         alert("Hiba: " + error.message);
@@ -54,87 +51,109 @@ window.kijelentkez = function() {
 };
 
 window.elfelejtettJelszo = async function() {
-    const email = document.getElementById("email").value.trim();
-    if (!email) return alert("Add meg az email címed!");
+    const email = document.getElementById("email").value;
+    if (!email) return alert("Kérlek add meg az email címedet!");
     try {
         await sendPasswordResetEmail(auth, email);
-        alert("Jelszó visszaállítási email elküldve!");
+        alert("Jelszó-visszaállítási email elküldve!");
     } catch (error) {
         alert("Hiba: " + error.message);
     }
 };
 
-window.confirmDeleteTopic = async function() {
-    const topicToDelete = document.getElementById("delete-topic-select").value;
-    if (!topicToDelete) return alert("Válassz ki egy témát a törléshez!");
+async function betoltTemak() {
+    const temaSelect = document.getElementById("post-topic");
+    if (!temaSelect) return;
+    temaSelect.innerHTML = '<option disabled selected>Válassz témát</option>';
+    const snapshot = await getDocs(collection(db, "topics"));
+    snapshot.forEach((topicDoc) => {
+        const opt = document.createElement("option");
+        opt.value = topicDoc.id;
+        opt.innerText = topicDoc.id;
+        temaSelect.appendChild(opt);
+    });
+}
 
-    if (confirm(`Biztosan törölni szeretnéd a(z) "${topicToDelete}" témát?`)) {
-        try {
-            await deleteDoc(doc(db, "topics", topicToDelete));
-            alert(`A(z) "${topicToDelete}" téma törölve.`);
-            await betoltTemak();
-        } catch (error) {
-            alert("Hiba törlés közben: " + error.message);
-        }
-    }
-};
-
-window.addTopicHokos = async function() {
-    const ujTema = document.getElementById("new-topic-input-hokos").value.trim();
-    if (!ujTema) return alert("Írj be egy témát!");
+window.hozzaadTemat = async function() {
+    const ujTema = document.getElementById("new-topic").value.trim();
+    if (!ujTema) return alert("Adj meg egy témanevet!");
 
     try {
         await setDoc(doc(db, "topics", ujTema), {});
         alert(`Téma hozzáadva: ${ujTema}`);
-        document.getElementById("new-topic-input-hokos").value = "";
-        await betoltTemak();
+        document.getElementById("new-topic").value = "";
+        betoltTemak();
     } catch (error) {
-        alert("Hiba téma hozzáadásakor: " + error.message);
+        alert("Hiba a téma hozzáadásakor: " + error.message);
     }
 };
 
-async function betoltTemak() {
-    const topicSelect = document.getElementById("delete-topic-select");
-    if (topicSelect) {
-        topicSelect.innerHTML = '<option disabled selected>Válassz törlendő témát</option>';
-        const snapshot = await getDocs(collection(db, "topics"));
-        snapshot.forEach((topicDoc) => {
-            const opt = document.createElement("option");
-            opt.value = topicDoc.id;
-            opt.innerText = topicDoc.id;
-            topicSelect.appendChild(opt);
-        });
+window.ujPoszt = async function() {
+    const title = document.getElementById("post-title").value;
+    const content = document.getElementById("post-content").value;
+    const topic = document.getElementById("post-topic").value;
+    if (!topic) return alert("Válassz témát a legördülő listából!");
+    await addDoc(collection(db, "posts"), { title, content, topic, author: auth.currentUser.email, date: new Date(), likes: 0, likedBy: [], underProcess: false });
+    alert("Poszt sikeresen létrehozva!");
+};
+
+window.setUserRole = async function() {
+    const userEmail = document.getElementById("user-email").value.trim();
+    const selectedRole = document.getElementById("role-select").value;
+
+    if (!userEmail || !selectedRole) {
+        return alert("Add meg az email címet és válaszd ki a jogkört!");
     }
 
-    const postTopicSelect = document.getElementById("post-topic");
-    if (postTopicSelect) {
-        postTopicSelect.innerHTML = '<option disabled selected>Válassz témát</option>';
-        const snapshot = await getDocs(collection(db, "topics"));
-        snapshot.forEach((topicDoc) => {
-            const opt = document.createElement("option");
-            opt.value = topicDoc.id;
-            opt.innerText = topicDoc.id;
-            postTopicSelect.appendChild(opt);
-        });
+    try {
+        const userRef = doc(db, "users", userEmail);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            await updateDoc(userRef, { role: selectedRole });
+        } else {
+            await setDoc(userRef, { role: selectedRole });
+        }
+        alert(`Jogkör beállítva: ${userEmail} -> ${selectedRole}`);
+    } catch (error) {
+        alert("Hiba a jogkör állítás során: " + error.message);
     }
-}
+};
 
 onAuthStateChanged(auth, async (user) => {
+    const authPanel = document.getElementById("auth-panel");
+    const logoutBtn = document.getElementById("logout-btn");
+    const passwordChangeBtn = document.getElementById("password-change-btn");
     const adminPanel = document.getElementById("admin-panel");
     const writerPanel = document.getElementById("writer-panel");
-    const hokosPanel = document.getElementById("hokos-panel");
     const navButtons = document.getElementById("nav-buttons");
+    const welcomeText = document.getElementById("welcome-text");
+    const emailDisplay = document.getElementById("user-email-display");
 
     if (user && user.emailVerified) {
+        document.body.classList.remove('before-login');
+        authPanel.style.display = "none";
+        logoutBtn.style.display = "block";
+        passwordChangeBtn.style.display = "block";
+        navButtons.style.display = "block";
+        emailDisplay.innerText = `Bejelentkezve: ${user.email}`;
+        welcomeText.style.display = "none";
+
         const userDoc = await getDoc(doc(db, "users", user.email));
         const role = userDoc.exists() ? userDoc.data().role : "user";
+        if (role === "admin") adminPanel.style.display = "block";
+        if (role === "writer" || role === "admin" || role === "hokos") writerPanel.style.display = "block";
 
-        adminPanel.style.display = role === "admin" ? "block" : "none";
-        hokosPanel.style.display = (role === "hokos") ? "block" : "none";
-        writerPanel.style.display = (role === "writer" || role === "admin" || role === "hokos") ? "block" : "none";
-        navButtons.style.display = "block";
-
-        await betoltTemak();
+        betoltTemak();
+    } else {
+        document.body.classList.add('before-login');
+        authPanel.style.display = "block";
+        logoutBtn.style.display = "none";
+        passwordChangeBtn.style.display = "none";
+        adminPanel.style.display = "none";
+        writerPanel.style.display = "none";
+        navButtons.style.display = "none";
+        emailDisplay.innerText = "";
+        welcomeText.style.display = "block";
     }
 });
 
@@ -144,7 +163,7 @@ window.showUserListModal = async function() {
     const snapshot = await getDocs(collection(db, "users"));
     snapshot.forEach((docu) => {
         const li = document.createElement("li");
-        li.textContent = `${docu.id} (Jogkör: ${docu.data().role})`;
+        li.innerHTML = `${docu.id} (Jogkör: ${docu.data().role}) <button onclick=\"deleteUserAccount('${docu.id}')\">Fiók törlése</button>`;
         userList.appendChild(li);
     });
     document.getElementById("user-list-modal").style.display = "block";
@@ -152,4 +171,47 @@ window.showUserListModal = async function() {
 
 window.closeUserListModal = function() {
     document.getElementById("user-list-modal").style.display = "none";
+};
+
+window.deleteUserAccount = async function(email) {
+    if (confirm(`Biztosan törölni szeretnéd ${email} fiókját?`)) {
+        try {
+            await deleteDoc(doc(db, "users", email));
+            alert(`A(z) ${email} felhasználó törölve az adatbázisból.`);
+            showUserListModal(); // Frissíti a listát
+        } catch (error) {
+            alert("Hiba a törlés során: " + error.message);
+        }
+    }
+};
+
+// Admin tématörlés funkció
+window.deleteTopic = async function(topicName) {
+    if (!confirm(`Biztosan törölni szeretnéd a(z) '${topicName}' témát?`)) return;
+    try {
+        await deleteDoc(doc(db, "topics", topicName));
+        alert("Téma törölve!");
+        betoltTemak();
+    } catch (error) {
+        alert("Hiba a törlés során: " + error.message);
+    }
+};
+
+// Frissített hozzaadTemat() függvény hökös támogatással
+window.hozzaadTemat = async function() {
+    if (currentUserRole !== "admin" && currentUserRole !== "hokos") {
+        return alert("Csak admin vagy hökös adhat hozzá új témát!");
+    }
+
+    const ujTema = document.getElementById("new-topic").value.trim();
+    if (!ujTema) return alert("Adj meg egy témanevet!");
+
+    try {
+        await setDoc(doc(db, "topics", ujTema), {});
+        alert(`Téma hozzáadva: ${ujTema}`);
+        document.getElementById("new-topic").value = "";
+        betoltTemak();
+    } catch (error) {
+        alert("Hiba a téma hozzáadásakor: " + error.message);
+    }
 };

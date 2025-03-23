@@ -109,3 +109,16 @@ window.returnToList = async function(postId) {
 };
 
 listUnderProcess();
+
+
+// Admin törlés ügyintézés alatt fülön
+window.deleteUnderProcessPost = async function(postId) {
+    if (!confirm("Biztosan törölni szeretnéd ezt az ügyintézés alatt lévő posztot?")) return;
+    try {
+        await deleteDoc(doc(db, "posts", postId));
+        alert("Poszt törölve.");
+        listUnderProcess();
+    } catch (error) {
+        alert("Hiba a törlés során: " + error.message);
+    }
+};

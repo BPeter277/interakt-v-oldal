@@ -64,6 +64,11 @@
 
     <div id="admin-panel" style="display:none;">
         <h3>Admin felület</h3>
+        <div class="admin-stats">
+            <p id="user-count">Felhasználók száma: </p>
+            <p id="post-count">Posztok száma: </p>
+            <p id="total-likes">Összes lájk: </p>
+        </div>
         <input type="email" id="user-email" placeholder="Felhasználó email">
         <select id="role-select">
             <option value="user">User</option>
@@ -74,11 +79,9 @@
         </select>
         <button onclick="setUserRole()">Jogkör beállítása</button>
 
-        <h4>Téma törlése</h4>
-        <select id="delete-topic-select">
-            <option disabled selected>Válassz törlendő témát</option>
-        </select>
-        <button onclick="confirmDeleteTopic()">Kész</button>
+        <h4>Téma hozzáadása</h4>
+        <input type="text" id="new-topic" placeholder="Új téma neve">
+        <button onclick="hozzaadTemat()">Téma hozzáadása</button>
 
         <h4>Felhasználók kezelése</h4>
         <button onclick="showUserListModal()">Összes regisztrált email megtekintése</button>
@@ -90,12 +93,6 @@
                 <button onclick="closeUserListModal()">Bezár</button>
             </div>
         </div>
-    </div>
-
-    <div id="hokos-panel" style="display:none;">
-        <h3>Téma hozzáadása hökös számára</h3>
-        <input type="text" id="new-topic-input-hokos" placeholder="Új téma neve">
-        <button onclick="addTopicHokos()">Téma hozzáadása</button>
     </div>
 
     <br>
