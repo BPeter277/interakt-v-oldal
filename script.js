@@ -170,7 +170,10 @@ onAuthStateChanged(auth, async (user) => {
 
         const userDoc = await getDoc(doc(db, "users", user.email));
         const role = userDoc.exists() ? userDoc.data().role : "user";
-        if (role === "admin") adminPanel.style.display = "block";
+        if (role === "admin") {
+            adminPanel.style.display = "block";
+            betoltTemakTorleshez();
+        }
         if (role === "writer" || role === "admin" || role === "hokos") writerPanel.style.display = "block";
 	if (role === "hokos") hokosPanel.style.display = "block";
 
