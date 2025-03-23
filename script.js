@@ -61,7 +61,7 @@ window.elfelejtettJelszo = async function() {
     }
 };
 
-async function betoltTemak() {
+// Régi betoltTemak törölve a frissítés miatt {
     const temaSelect = document.getElementById("post-topic");
     if (!temaSelect) return;
     temaSelect.innerHTML = '<option disabled selected>Válassz témát</option>';
@@ -215,3 +215,29 @@ window.hozzaadTemat = async function() {
         alert("Hiba a téma hozzáadásakor: " + error.message);
     }
 };
+
+async function betoltTemak() {
+    const temaSelect = document.getElementById("post-topic");
+    const topicList = document.getElementById("topic-list");
+    if (temaSelect) {
+        temaSelect.innerHTML = '<option disabled selected>Válassz témát</option>';
+    }
+    if (topicList) {
+        topicList.innerHTML = "";
+    }
+    const snapshot = await getDocs(collection(db, "topics"));
+    snapshot.forEach((topicDoc) => {
+        if (temaSelect) {
+            const opt = document.createElement("option");
+            opt.value = topicDoc.id;
+            opt.innerText = topicDoc.id;
+            temaSelect.appendChild(opt);
+        }
+        if (topicList && (currentUserRole === "admin")) {
+            const li = document.createElement("li");
+            li.style.margin = "5px 0";
+            li.innerHTML = `${topicDoc.id} <button onclick="deleteTopic('${topicDoc.id}')">Törlés</button>`;
+            topicList.appendChild(li);
+        }
+    });
+}
