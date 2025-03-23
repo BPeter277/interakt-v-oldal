@@ -38,6 +38,7 @@ async function listSolved() {
     container.innerHTML = "";
     snapshot.forEach((post) => {
         const data = post.data();
+	console.log("Megjelenített solved poszt ID:", post.id); // Ellenőrzéshez
         const div = document.createElement("div");
         div.className = "post-card";
         div.innerHTML = `
@@ -56,6 +57,7 @@ async function listSolved() {
 }
 
 window.deleteSolvedPost = async function(postId) {
+    console.log("Törölni próbált solved poszt ID:", postId); // Ellenőrzéshez
     if (confirm("Biztosan törölni szeretnéd ezt a lezárt posztot?")) {
         try {
             await deleteDoc(doc(db, "solved", postId));
