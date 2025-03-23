@@ -216,6 +216,9 @@ window.hozzaadTemat = async function() {
     }
 };
 
+
+
+
 async function betoltTemak() {
     const temaSelect = document.getElementById("post-topic");
     const topicList = document.getElementById("topic-list");
@@ -241,3 +244,4 @@ async function betoltTemak() {
         }
     });
 }
+
