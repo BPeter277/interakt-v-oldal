@@ -104,14 +104,19 @@ async function betoltTemak() {
 }
 
 window.hozzaadTemat = async function() {
-    const ujTema = document.getElementById("new-topic").value.trim();
+    const adminInput = document.getElementById("admin-new-topic");
+    const hokosInput = document.getElementById("hokos-new-topic");
+
+    const ujTema = adminInput?.value.trim() || hokosInput?.value.trim();
     if (!ujTema) return alert("Adj meg egy témanevet!");
 
     try {
         await setDoc(doc(db, "topics", ujTema), {});
         alert(`Téma hozzáadva: ${ujTema}`);
-        document.getElementById("new-topic").value = "";
+        if (adminInput) adminInput.value = "";
+        if (hokosInput) hokosInput.value = "";
         betoltTemak();
+        betoltTemakTorleshez();
     } catch (error) {
         alert("Hiba a téma hozzáadásakor: " + error.message);
     }
