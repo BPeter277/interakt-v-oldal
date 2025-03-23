@@ -152,6 +152,7 @@ onAuthStateChanged(auth, async (user) => {
         logoutBtn.style.display = "none";
         passwordChangeBtn.style.display = "none";
         adminPanel.style.display = "none";
+	hokosPanel.style.display = "none";
         writerPanel.style.display = "none";
         navButtons.style.display = "none";
         emailDisplay.innerText = "";
