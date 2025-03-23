@@ -80,6 +80,15 @@ window.closeTopicDeleteModal = function() {
 window.confirmAddTopic = async function() {
   const ujTema = document.getElementById("new-topic-input").value.trim();
   if (!ujTema) return alert("Adj meg egy témanevet!");
+
+  const user = auth.currentUser;
+  const userDoc = await getDoc(doc(db, "users", user.email));
+  const role = userDoc.data().role;
+
+  if (role !== "admin" && role !== "hokos") {
+    return alert("Csak admin vagy hökös adhat hozzá témát.");
+  }
+
   try {
     await setDoc(doc(db, "topics", ujTema), {});
     alert(`Téma hozzáadva: ${ujTema}`);
@@ -93,6 +102,15 @@ window.confirmAddTopic = async function() {
 window.confirmDeleteTopic = async function() {
   const torlendoTema = document.getElementById("delete-topic-input").value.trim();
   if (!torlendoTema) return alert("Adj meg egy törlendő témát!");
+
+  const user = auth.currentUser;
+  const userDoc = await getDoc(doc(db, "users", user.email));
+  const role = userDoc.data().role;
+
+  if (role !== "admin") {
+    return alert("Csak admin törölhet témát.");
+  }
+
   try {
     await deleteDoc(doc(db, "topics", torlendoTema));
     alert(`Téma törölve: ${torlendoTema}`);
@@ -106,9 +124,11 @@ window.confirmDeleteTopic = async function() {
 window.setUserRole = async function() {
   const userEmail = document.getElementById("user-email").value.trim();
   const selectedRole = document.getElementById("role-select").value;
+
   if (!userEmail || !selectedRole) {
     return alert("Add meg az email címet és válassz ki jogkört!");
   }
+
   try {
     const userRef = doc(db, "users", userEmail);
     const userDoc = await getDoc(userRef);
@@ -128,5 +148,15 @@ onAuthStateChanged(auth, async (user) => {
   if (backBtn) {
     backBtn.style.display = user && user.emailVerified ? "block" : "none";
   }
-});
 
+  // Minden oldal bal felső sarkában jelenjen meg a vissza gomb, ha be van jelentkezve
+  if (user && user.emailVerified) {
+    const backButton = document.createElement("button");
+    backButton.textContent = "🏠 Főoldal";
+    backButton.style.position = "fixed";
+    backButton.style.top = "5px";
+    backButton.style.left = "5px";
+    backButton.onclick = () => window.location.href = "index.html";
+    document.body.appendChild(backButton);
+  }
+});

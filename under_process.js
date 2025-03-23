@@ -1,6 +1,5 @@
-// under_process.js - frissített változat
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -17,77 +16,48 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 async function loadUnderProcessPosts() {
-  const underProcessListDiv = document.getElementById("under-process-list");
-  underProcessListDiv.innerHTML = "";
+  const postListDiv = document.getElementById("under-process-list");
+  postListDiv.innerHTML = "";
   const snapshot = await getDocs(collection(db, "under_process"));
 
-  onAuthStateChanged(auth, (user) => {
-    const isAdminOrHokos = user && user.emailVerified;
+  const user = auth.currentUser;
+  let role = "user";
 
-    snapshot.forEach((docu) => {
-      const post = docu.data();
-      const div = document.createElement("div");
-      div.classList.add("post-item");
-      div.innerHTML = `
-        <h3>${post.title}</h3>
-        <p>${post.content}</p>
-        <p><strong>Téma:</strong> ${post.topic}</p>
-        <p><strong>Létrehozva:</strong> ${new Date(post.date.seconds * 1000).toLocaleString()}</p>
-      `;
+  if (user) {
+    const userDoc = await getDoc(doc(db, "users", user.email));
+    if (userDoc.exists()) {
+      role = userDoc.data().role;
+    }
+  }
 
-      if (isAdminOrHokos) {
-        const closeBtn = document.createElement("button");
-        closeBtn.textContent = "Lezárás";
-        closeBtn.onclick = () => showCloseModal(docu.id);
-        div.appendChild(closeBtn);
+  snapshot.forEach((docu) => {
+    const post = docu.data();
+    const div = document.createElement("div");
+    div.classList.add("post-item");
+    div.innerHTML = `
+      <h3>${post.title}</h3>
+      <p>${post.content}</p>
+      <p><strong>Téma:</strong> ${post.topic}</p>
+      <p><strong>Áthelyezve ügyintézésre:</strong> ${new Date(post.underProcessDate.seconds * 1000).toLocaleString()}</p>
+    `;
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Törlés";
-        deleteBtn.onclick = async () => {
-          if (confirm("Biztosan törölni szeretnéd ezt a posztot?")) {
-            await deleteDoc(doc(db, "under_process", docu.id));
-            alert("Poszt törölve.");
-            loadUnderProcessPosts();
-          }
-        };
-        div.appendChild(deleteBtn);
-      }
+    if (role === "admin") {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Törlés";
+      deleteBtn.onclick = async () => {
+        if (confirm("Biztosan törlöd ezt a posztot?")) {
+          await deleteDoc(doc(db, "under_process", docu.id));
+          alert("Poszt törölve.");
+          loadUnderProcessPosts();
+        }
+      };
+      div.appendChild(deleteBtn);
+    }
 
-      underProcessListDiv.appendChild(div);
-    });
+    postListDiv.appendChild(div);
   });
 }
 
-window.showCloseModal = function(postId) {
-  const modal = document.createElement("div");
-  modal.classList.add("modal");
-  modal.innerHTML = `
-    <div class="modal-content">
-      <h3>Lezárási megjegyzés:</h3>
-      <textarea id="solution-note"></textarea>
-      <button onclick="closePost('${postId}')">Kész</button>
-      <button onclick="this.parentElement.parentElement.remove()">Mégse</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-};
-
-window.closePost = async function(postId) {
-  const note = document.getElementById("solution-note").value;
-  const postDoc = await getDoc(doc(db, "under_process", postId));
-  if (postDoc.exists()) {
-    const post = postDoc.data();
-    await addDoc(collection(db, "solved"), {
-      ...post,
-      solvedDate: new Date(),
-      solutionNote: note,
-      underProcessDate: post.underProcessDate || new Date()
-    });
-    await deleteDoc(doc(db, "under_process", postId));
-    alert("Poszt lezárva és áthelyezve a Megoldott ügyek közé.");
-    document.querySelector(".modal").remove();
-    loadUnderProcessPosts();
-  }
-};
-
-loadUnderProcessPosts();
+onAuthStateChanged(auth, (user) => {
+  if (user && user.emailVerified) loadUnderProcessPosts();
+});

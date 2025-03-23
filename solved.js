@@ -1,4 +1,3 @@
-// solved.js - frissített változat
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
@@ -17,43 +16,51 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 async function loadSolvedPosts() {
-  const solvedListDiv = document.getElementById("solved-list");
-  solvedListDiv.innerHTML = "";
+  const postListDiv = document.getElementById("solved-list");
+  postListDiv.innerHTML = "";
   const snapshot = await getDocs(collection(db, "solved"));
 
-  onAuthStateChanged(auth, (user) => {
-    const isAdmin = user && user.emailVerified;
+  const user = auth.currentUser;
+  let role = "user";
 
-    snapshot.forEach((docu) => {
-      const post = docu.data();
-      const div = document.createElement("div");
-      div.classList.add("post-item");
-      div.innerHTML = `
-        <h3>${post.title}</h3>
-        <p>${post.content}</p>
-        <p><strong>Téma:</strong> ${post.topic}</p>
-        <p><strong>Létrehozás dátuma:</strong> ${new Date(post.date.seconds * 1000).toLocaleString()}</p>
-        <p><strong>Ügyintézésre került:</strong> ${new Date(post.underProcessDate.seconds * 1000).toLocaleString()}</p>
-        <p><strong>Megoldás dátuma:</strong> ${new Date(post.solvedDate.seconds * 1000).toLocaleString()}</p>
-        <p><strong>Lezárási megjegyzés:</strong> ${post.solutionNote}</p>
-      `;
+  if (user) {
+    const userDoc = await getDoc(doc(db, "users", user.email));
+    if (userDoc.exists()) {
+      role = userDoc.data().role;
+    }
+  }
 
-      if (isAdmin) {
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Törlés";
-        deleteBtn.onclick = async () => {
-          if (confirm("Biztosan törlöd ezt a posztot a megoldottak közül?")) {
-            await deleteDoc(doc(db, "solved", docu.id));
-            alert("Poszt törölve.");
-            loadSolvedPosts();
-          }
-        };
-        div.appendChild(deleteBtn);
-      }
+  snapshot.forEach((docu) => {
+    const post = docu.data();
+    const div = document.createElement("div");
+    div.classList.add("post-item");
+    div.innerHTML = `
+      <h3>${post.title}</h3>
+      <p>${post.content}</p>
+      <p><strong>Téma:</strong> ${post.topic}</p>
+      <p><strong>Kiírás dátuma:</strong> ${new Date(post.date.seconds * 1000).toLocaleString()}</p>
+      <p><strong>Ügyintézés alá helyezés dátuma:</strong> ${new Date(post.underProcessDate.seconds * 1000).toLocaleString()}</p>
+      <p><strong>Lezárás dátuma:</strong> ${new Date(post.closedDate.seconds * 1000).toLocaleString()}</p>
+      <p><strong>Megoldás leírása:</strong> ${post.solutionText}</p>
+    `;
 
-      solvedListDiv.appendChild(div);
-    });
+    if (role === "admin") {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Törlés";
+      deleteBtn.onclick = async () => {
+        if (confirm("Biztosan törlöd ezt a posztot?")) {
+          await deleteDoc(doc(db, "solved", docu.id));
+          alert("Poszt törölve.");
+          loadSolvedPosts();
+        }
+      };
+      div.appendChild(deleteBtn);
+    }
+
+    postListDiv.appendChild(div);
   });
 }
 
-loadSolvedPosts();
+onAuthStateChanged(auth, (user) => {
+  if (user && user.emailVerified) loadSolvedPosts();
+});
