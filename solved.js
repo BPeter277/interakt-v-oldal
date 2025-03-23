@@ -39,16 +39,3 @@ async function listSolved() {
 }
 
 listSolved();
-
-
-// Admin törlés lezárt posztoknál
-window.deleteSolvedPost = async function(postId) {
-    if (!confirm("Biztosan törölni szeretnéd ezt a megoldott posztot?")) return;
-    try {
-        await deleteDoc(doc(db, "solved", postId));
-        alert("Poszt törölve.");
-        listSolved();
-    } catch (error) {
-        alert("Hiba a törlés során: " + error.message);
-    }
-};

@@ -61,7 +61,7 @@ window.elfelejtettJelszo = async function() {
     }
 };
 
-// Régi betoltTemak törölve a frissítés miatt {
+async function betoltTemak() {
     const temaSelect = document.getElementById("post-topic");
     if (!temaSelect) return;
     temaSelect.innerHTML = '<option disabled selected>Válassz témát</option>';
@@ -184,64 +184,3 @@ window.deleteUserAccount = async function(email) {
         }
     }
 };
-
-// Admin tématörlés funkció
-window.deleteTopic = async function(topicName) {
-    if (!confirm(`Biztosan törölni szeretnéd a(z) '${topicName}' témát?`)) return;
-    try {
-        await deleteDoc(doc(db, "topics", topicName));
-        alert("Téma törölve!");
-        betoltTemak();
-    } catch (error) {
-        alert("Hiba a törlés során: " + error.message);
-    }
-};
-
-// Frissített hozzaadTemat() függvény hökös támogatással
-window.hozzaadTemat = async function() {
-    if (currentUserRole !== "admin" && currentUserRole !== "hokos") {
-        return alert("Csak admin vagy hökös adhat hozzá új témát!");
-    }
-
-    const ujTema = document.getElementById("new-topic").value.trim();
-    if (!ujTema) return alert("Adj meg egy témanevet!");
-
-    try {
-        await setDoc(doc(db, "topics", ujTema), {});
-        alert(`Téma hozzáadva: ${ujTema}`);
-        document.getElementById("new-topic").value = "";
-        betoltTemak();
-    } catch (error) {
-        alert("Hiba a téma hozzáadásakor: " + error.message);
-    }
-};
-
-
-
-
-async function betoltTemak() {
-    const temaSelect = document.getElementById("post-topic");
-    const topicList = document.getElementById("topic-list");
-    if (temaSelect) {
-        temaSelect.innerHTML = '<option disabled selected>Válassz témát</option>';
-    }
-    if (topicList) {
-        topicList.innerHTML = "";
-    }
-    const snapshot = await getDocs(collection(db, "topics"));
-    snapshot.forEach((topicDoc) => {
-        if (temaSelect) {
-            const opt = document.createElement("option");
-            opt.value = topicDoc.id;
-            opt.innerText = topicDoc.id;
-            temaSelect.appendChild(opt);
-        }
-        if (topicList && (currentUserRole === "admin")) {
-            const li = document.createElement("li");
-            li.style.margin = "5px 0";
-            li.innerHTML = `${topicDoc.id} <button onclick="deleteTopic('${topicDoc.id}')">Törlés</button>`;
-            topicList.appendChild(li);
-        }
-    });
-}
-
