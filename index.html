@@ -32,10 +32,23 @@
             width: 80%;
             max-width: 500px;
         }
+        #back-to-main {
+            position: fixed;
+            top: 30px;
+            left: 10px;
+            font-size: 14px;
+            background-color: #f0f0f0;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: none;
+        }
     </style>
 </head>
 <body class="before-login">
     <div id="user-email-display"></div>
+    <button id="back-to-main" onclick="location.href='index.html'">🏠 Vissza a főoldalra</button>
     <div class="header">
         <button id="logout-btn" onclick="kijelentkez()" style="display:none;">Kijelentkezés</button>
         <button id="password-change-btn" onclick="location.href='password_change.html'" style="display:none;">Jelszómódosítás</button>
@@ -63,7 +76,7 @@
     </div>
 
     <div id="admin-panel" style="display:none;">
-        <h3>Admin felület</h3>
+        <h3>Admin / Hökös felület</h3>
         <div class="admin-stats">
             <p id="user-count">Felhasználók száma: </p>
             <p id="post-count">Posztok száma: </p>
@@ -79,9 +92,27 @@
         </select>
         <button onclick="setUserRole()">Jogkör beállítása</button>
 
-        <h4>Téma hozzáadása</h4>
-        <input type="text" id="new-topic" placeholder="Új téma neve">
-        <button onclick="hozzaadTemat()">Téma hozzáadása</button>
+        <h4>Téma hozzáadása / törlése</h4>
+        <button onclick="showTopicModal()">Téma hozzáadása</button>
+        <button onclick="showTopicDeleteModal()">Téma törlése</button>
+
+        <div id="add-topic-modal" class="modal">
+            <div class="modal-content">
+                <h3>Új téma hozzáadása:</h3>
+                <input type="text" id="new-topic-input" placeholder="Új téma neve">
+                <button onclick="confirmAddTopic()">Kész</button>
+                <button onclick="closeTopicModal()">Mégse</button>
+            </div>
+        </div>
+
+        <div id="delete-topic-modal" class="modal">
+            <div class="modal-content">
+                <h3>Téma törlése:</h3>
+                <input type="text" id="delete-topic-input" placeholder="Törlendő téma neve">
+                <button onclick="confirmDeleteTopic()">Törlés</button>
+                <button onclick="closeTopicDeleteModal()">Mégse</button>
+            </div>
+        </div>
 
         <h4>Felhasználók kezelése</h4>
         <button onclick="showUserListModal()">Összes regisztrált email megtekintése</button>

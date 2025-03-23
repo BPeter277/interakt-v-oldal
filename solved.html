@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Megoldott posztok</title>
+    <title>✅ Megoldott ügyek</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        #back-to-main {
+            position: fixed;
+            top: 30px;
+            left: 10px;
+            font-size: 14px;
+            background-color: #f0f0f0;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+    </style>
 </head>
-<body class="light-mode">
-    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
-    <h1>Megoldott posztok</h1>
+<body>
+    <div id="user-email-display"></div>
+    <button id="back-to-main" onclick="location.href='index.html'">🏠 Vissza a főoldalra</button>
+
+    <h1>Megoldott ügyek listája</h1>
     <div id="solved-list"></div>
 
     <script type="module" src="solved.js"></script>
-    <script>
-    function toggleTheme() {
-        const body = document.body;
-        body.classList.toggle('dark-mode');
-        body.classList.toggle('light-mode');
-    }
-    </script>
 </body>
 </html>

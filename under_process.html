@@ -3,59 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ügyintézés alatt lévő posztok</title>
+    <title>📂 Ügyintézés alatt</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        #user-email-display {
+        #back-to-main {
             position: fixed;
-            top: 5px;
+            top: 30px;
             left: 10px;
-            font-size: 12px;
-            color: gray;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 100px auto;
-            width: 80%;
-            max-width: 500px;
-        }
-        textarea {
-            width: 100%;
-            height: 80px;
+            font-size: 14px;
+            background-color: #f0f0f0;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 8px;
         }
     </style>
 </head>
-<body class="light-mode">
+<body>
     <div id="user-email-display"></div>
-    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
+    <button id="back-to-main" onclick="location.href='index.html'">🏠 Vissza a főoldalra</button>
+
     <h1>Ügyintézés alatt lévő posztok</h1>
     <div id="under-process-list"></div>
 
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <textarea id="solution-text" placeholder="Írd be a megoldás szövegét..."></textarea>
-            <br>
-            <button onclick="submitSolution()">Kész</button>
-            <button onclick="closeModal()">Mégse</button>
-        </div>
-    </div>
-
     <script type="module" src="under_process.js"></script>
-    <script>
-    function toggleTheme() {
-        const body = document.body;
-        body.classList.toggle('dark-mode');
-        body.classList.toggle('light-mode');
-    }
-    </script>
 </body>
 </html>
