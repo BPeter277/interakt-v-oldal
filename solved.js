@@ -1,5 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
@@ -16,14 +18,11 @@ const auth = getAuth(app);
 
 let currentUser = null;
 let currentUserRole = "user";
-let currentPostToClose = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        currentUser = user;
-        document.getElementById("user-email-display").innerText = `Bejelentkezve: ${user.email}`;
-        const users = await getDocs(collection(db, "users"));
-        users.forEach((docu) => {
+        const userDocs = await getDocs(collection(db, "users"));
+        userDocs.forEach((docu) => {
             if (docu.id === user.email) {
                 currentUserRole = docu.data().role;
             }
@@ -31,6 +30,7 @@ onAuthStateChanged(auth, async (user) => {
         listSolved();
     }
 });
+
 async function listSolved() {
     const container = document.getElementById("solved-list");
     container.innerHTML = "<h3>Betöltés...</h3>";
