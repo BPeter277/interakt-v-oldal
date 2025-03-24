@@ -32,9 +32,24 @@
             width: 100%;
             height: 80px;
         }
+	#back-to-main-btn {
+            background-color: transparent;
+            border: none;
+            color: gray;
+            text-decoration: underline;
+            font-size: 12px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        #back-to-main-btn:hover {
+            color: darkgray;
+        }
     </style>
 </head>
 <body class="light-mode">
+    <button id="back-to-main-btn" onclick="window.location.href='index.html'">Vissza a főmenübe</button>
     <div id="user-email-display"></div>
     <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
     <h1>Ügyintézés alatt lévő posztok</h1>

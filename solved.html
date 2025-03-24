@@ -3,15 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Megoldott posztok</title>
+    <title>Ügyintézés alatt lévő posztok</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        #user-email-display {
+            position: fixed;
+            top: 5px;
+            left: 10px;
+            font-size: 12px;
+            color: gray;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 100px auto;
+            width: 80%;
+            max-width: 500px;
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+        }
+        #back-to-main-btn {
+            background-color: transparent;
+            border: none;
+            color: gray;
+            text-decoration: underline;
+            font-size: 12px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        #back-to-main-btn:hover {
+            color: darkgray;
+        }
+    </style>
 </head>
 <body class="light-mode">
+    <button id="back-to-main-btn" onclick="window.location.href='index.html'">Vissza a főmenübe</button>
+    <div id="user-email-display"></div>
     <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
-    <h1>Megoldott posztok</h1>
-    <div id="solved-list"></div>
+    <h1>Ügyintézés alatt lévő posztok</h1>
+    <div id="under-process-list"></div>
 
-    <script type="module" src="solved.js"></script>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <textarea id="solution-text" placeholder="Írd be a megoldás szövegét..."></textarea>
+            <br>
+            <button onclick="submitSolution()">Kész</button>
+            <button onclick="closeModal()">Mégse</button>
+        </div>
+    </div>
+
+    <script type="module" src="under_process.js"></script>
     <script>
     function toggleTheme() {
         const body = document.body;
