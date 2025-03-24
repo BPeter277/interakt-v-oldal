@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email megerősítés</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background: url('https://images.unsplash.com/photo-1498575207490-7a37c27b91f9?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .box {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Email megerősítés folyamatban...</h2>
+        <p id="status">Kérlek, várj egy pillanatot...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAuth, applyActionCode } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
+            authDomain: "bejelent-3768f.firebaseapp.com",
+            projectId: "bejelent-3768f",
+            storageBucket: "bejelent-3768f.appspot.com",
+            messagingSenderId: "253589417646",
+            appId: "1:253589417646:web:2fb9eea186af2c6243873f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const params = new URLSearchParams(window.location.search);
+        const oobCode = params.get("oobCode");
+
+        async function confirmEmailVerification() {
+            if (!oobCode) {
+                document.getElementById("status").innerText = "Érvénytelen vagy hiányzó megerősítő kód.";
+                return;
+            }
+
+            try {
+                await applyActionCode(auth, oobCode);
+                document.getElementById("status").innerText = "Sikeres megerősítés! Most már bejelentkezhetsz.";
+                setTimeout(() => window.location.href = "index.html", 3000);
+            } catch (error) {
+                document.getElementById("status").innerText = "Hiba történt a megerősítés során: " + error.message;
+            }
+        }
+
+        confirmEmailVerification();
+    </script>
+</body>
+</html>
