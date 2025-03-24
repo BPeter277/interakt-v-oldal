@@ -1,0 +1,85 @@
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regisztráció</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1498575207490-7a37c27b91f9?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .register-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>Új felhasználó regisztrációja</h2>
+        <input type="email" id="register-email" placeholder="Email cím">
+        <input type="password" id="register-password" placeholder="Jelszó">
+        <input type="password" id="confirm-password" placeholder="Jelszó megerősítése">
+        <button onclick="regisztralUjFelhasznalo()">Regisztráció</button>
+        <button onclick="location.href='index.html'">Vissza a főoldalra</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgMwGI2LjzcxL60K5GoM7vo6nAKtwxPV4",
+            authDomain: "bejelent-3768f.firebaseapp.com",
+            projectId: "bejelent-3768f",
+            storageBucket: "bejelent-3768f.appspot.com",
+            messagingSenderId: "253589417646",
+            appId: "1:253589417646:web:2fb9eea186af2c6243873f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.regisztralUjFelhasznalo = async function() {
+            const email = document.getElementById("register-email").value;
+            const password = document.getElementById("register-password").value;
+            const confirmPassword = document.getElementById("confirm-password").value;
+
+            if (!email.endsWith("@uni-corvinus.hu") && !email.endsWith("@stud.uni-corvinus.hu")) {
+                return alert("Nem megfelelő email formátum! Csak corvinusos e-mail címmel lehet regisztrálni.");
+            }
+
+            if (password !== confirmPassword) {
+                return alert("A jelszavak nem egyeznek!");
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", email), { role: "writer" });
+                await sendEmailVerification(userCredential.user);
+                alert("Sikeres regisztráció! Kérlek, erősítsd meg az email-címedet a kiküldött levélben.");
+                await signOut(auth);
+                window.location.href = "index.html";
+            } catch (error) {
+                alert("Hiba: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
