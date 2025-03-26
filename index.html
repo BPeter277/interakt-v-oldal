@@ -32,6 +32,18 @@
             width: 80%;
             max-width: 500px;
         }
+        #resend-verification-btn {
+            background-color: transparent;
+            border: none;
+            color: gray;
+            text-decoration: underline;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #resend-verification-btn:hover {
+            color: darkgray;
+        }
     </style>
 </head>
 <body class="before-login">
@@ -47,9 +59,12 @@
         <input type="email" id="email" placeholder="Email cím">
         <input type="password" id="password" placeholder="Jelszó">
         <br>
-        <button onclick="regisztral()">Regisztráció</button>
+        <button onclick="location.href='register.html'">Regisztráció</button>
         <button onclick="bejelentkez()">Bejelentkezés</button>
-        <button onclick="elfelejtettJelszo()">Elfelejtett jelszó</button>
+        <br>
+        <button id="resend-verification-btn" onclick="elfelejtettJelszo()">Elfelejtett jelszó</button>
+        <br>
+        <button id="resend-verification-btn" onclick="ujraKuldMegerositest()">Megerősítő email újraküldése</button>
     </div>
 
     <div id="writer-panel" style="display:none;">

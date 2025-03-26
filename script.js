@@ -61,6 +61,27 @@ window.elfelejtettJelszo = async function() {
     }
 };
 
+window.ujraKuldMegerositest = async function() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    if (!email || !password) {
+        return alert("Kérlek, add meg az email címedet és jelszavadat!");
+    }
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        if (userCredential.user.emailVerified) {
+            alert("Ez az email cím már meg van erősítve.");
+            await signOut(auth);
+        } else {
+            await sendEmailVerification(userCredential.user);
+            alert("A megerősítő email újra elküldve. Kérlek, ellenőrizd a postafiókodat!");
+            await signOut(auth);
+        }
+    } catch (error) {
+        alert("Hiba: " + error.message);
+    }
+};
+
 async function betoltTemakTorleshez() {
     const deleteSelect = document.getElementById("delete-topic-select");
     if (!deleteSelect) return;
