@@ -33,35 +33,35 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-async function listUnderProcess() {
-    const container = document.getElementById("under-process-list");
-    container.innerHTML = "<h3>Betöltés...</h3>";
-    const q = query(collection(db, "posts"), orderBy("date", "desc"));
+window.listUnderProcess = async function() {
+    const postList = document.getElementById("under-process-post-list");
+    postList.innerHTML = "";
+
+    const q = query(collection(db, "posts"), orderBy("underProcessDate", "desc"));
     const snapshot = await getDocs(q);
 
-    container.innerHTML = "";
     snapshot.forEach((post) => {
         const data = post.data();
+        const postId = post.id;
+
         if (data.underProcess) {
             const div = document.createElement("div");
             div.className = "post-card";
             div.innerHTML = `
-    		<h3>${data.title}</h3>
-    		<p>${data.content}</p>
-    		<p><strong>Téma:</strong> ${data.topic}</p>
-    		<p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
-    		<p><strong>Lájkok:</strong> ${data.likes || 0}</p>
-		</button>
-    		${(currentUserRole === "admin" || currentUserRole === "hokos") 
-        		? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button>
-           		<button onclick="returnToList('${post.id}')">Visszatesz</button>
-           	${(currentUserRole === "admin") ? `<button onclick="deleteUnderProcessPost('${post.id}')">🗑 Törlés</button>` : ""}` 
-        	: ""}
-`;
-            container.appendChild(div);
+                <h3>${data.title}</h3>
+                <p>${data.content}</p>
+                <p><strong>Téma:</strong> ${data.topic}</p>
+                <p><small>Ügyintézés alá vonva: ${new Date(data.underProcessDate.seconds * 1000).toLocaleString()}</small></p>
+                ${(currentUserRole === "admin" || currentUserRole === "hokos") ? `
+                    <button onclick="deleteUnderProcessPost('${postId}')">🗑 Törlés</button>
+                    <button onclick="returnToList('${postId}')">↩️ Visszatesz</button>
+                    <button onclick="openSolutionModal('${postId}')">✅ Lezár</button>
+                ` : ""}
+            `;
+            postList.appendChild(div);
         }
     });
-}
+};
 
 window.openSolutionModal = function(postId) {
     currentPostToClose = postId;
@@ -76,7 +76,7 @@ window.closeModal = function() {
 window.submitSolution = async function() {
     const solutionText = document.getElementById("solution-text").value;
     if (!solutionText || !currentPostToClose) return alert("Írj be megoldási szöveget!");
-    
+
     const postRef = doc(db, "posts", currentPostToClose);
     const postSnapshot = await getDocs(collection(db, "posts"));
     let postData = null;
