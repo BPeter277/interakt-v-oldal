@@ -1,4 +1,4 @@
-	import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
@@ -21,11 +21,11 @@ let currentPostToClose = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-
-	currentUserEmail = user.email;
+        currentUser = user;
+        document.getElementById("user-email-display").innerText = `Bejelentkezve: ${user.email}`;
         const users = await getDocs(collection(db, "users"));
         users.forEach((docu) => {
-            if (docu.id === currentUser.email) {
+            if (docu.id === user.email) {
                 currentUserRole = docu.data().role;
             }
         });
@@ -33,34 +33,34 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-window.listUnderProcess = async function() {
-    const postList = document.getElementById("post-list");
-    postList.innerHTML = "";
-
-    const q = query(collection(db, "posts"), orderBy("underProcessDate", "desc"));
+async function listUnderProcess() {
+    const container = document.getElementById("under-process-list");
+    container.innerHTML = "<h3>Betöltés...</h3>";
+    const q = query(collection(db, "posts"), orderBy("date", "desc"));
     const snapshot = await getDocs(q);
 
+    container.innerHTML = "";
     snapshot.forEach((post) => {
         const data = post.data();
-        const postId = post.id;
-
         if (data.underProcess) {
             const div = document.createElement("div");
             div.className = "post-card";
             div.innerHTML = `
-                <h3>${data.title}</h3>
-                <p>${data.content}</p>
-                <p><strong>Téma:</strong> ${data.topic}</p>
-                <p><small>Ügyintézés alá vonva: ${new Date(data.underProcessDate.seconds * 1000).toLocaleString()}</small></p>
-                ${(currentUserRole === "admin" || currentUserRole === "hokos" || currentUserRole === "user") ? `
-                    <button onclick="deleteUnderProcessPost('${postId}')">🗑 Törlés</button>
-                    <button onclick="returnToList('${postId}')">↩️ Visszatesz</button>
-                    <button onclick="openSolutionModal('${postId}')">✅ Lezár</button> : ""}
-            `;
-            postList.appendChild(div);
+    		<h3>${data.title}</h3>
+    		<p>${data.content}</p>
+    		<p><strong>Téma:</strong> ${data.topic}</p>
+    		<p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
+    		<p><strong>Lájkok:</strong> ${data.likes || 0}</p>
+    		${(currentUserRole === "admin" || currentUserRole === "hokos") 
+        		? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button>
+           		<button onclick="returnToList('${post.id}')">Visszatesz</button>
+           	${(currentUserRole === "admin") ? `<button onclick="deleteUnderProcessPost('${post.id}')">🗑 Törlés</button>` : ""}` 
+        	: ""}
+`;
+            container.appendChild(div);
         }
     });
-};
+}
 
 window.openSolutionModal = function(postId) {
     currentPostToClose = postId;
@@ -75,7 +75,7 @@ window.closeModal = function() {
 window.submitSolution = async function() {
     const solutionText = document.getElementById("solution-text").value;
     if (!solutionText || !currentPostToClose) return alert("Írj be megoldási szöveget!");
-
+    
     const postRef = doc(db, "posts", currentPostToClose);
     const postSnapshot = await getDocs(collection(db, "posts"));
     let postData = null;
