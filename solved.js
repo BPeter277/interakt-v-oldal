@@ -31,9 +31,10 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-async function listSolved() {
+window.listSolved = async function() {
     const container = document.getElementById("solved-list");
     container.innerHTML = "<h3>Betöltés...</h3>";
+
     const q = query(collection(db, "solved"), orderBy("solvedDate", "desc"));
     const snapshot = await getDocs(q);
 
