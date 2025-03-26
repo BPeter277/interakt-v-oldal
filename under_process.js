@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+	import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
@@ -21,11 +21,11 @@ let currentPostToClose = null;
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        currentUser = user;
-        document.getElementById("user-email-display").innerText = `Bejelentkezve: ${user.email}`;
+
+	currentUserEmail = user.email;
         const users = await getDocs(collection(db, "users"));
         users.forEach((docu) => {
-            if (docu.id === user.email) {
+            if (docu.id === currentUser.email) {
                 currentUserRole = docu.data().role;
             }
         });
@@ -34,7 +34,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 window.listUnderProcess = async function() {
-    const postList = document.getElementById("under-process-post-list");
+    const postList = document.getElementById("post-list");
     postList.innerHTML = "";
 
     const q = query(collection(db, "posts"), orderBy("underProcessDate", "desc"));
@@ -52,11 +52,10 @@ window.listUnderProcess = async function() {
                 <p>${data.content}</p>
                 <p><strong>Téma:</strong> ${data.topic}</p>
                 <p><small>Ügyintézés alá vonva: ${new Date(data.underProcessDate.seconds * 1000).toLocaleString()}</small></p>
-                ${(currentUserRole === "admin" || currentUserRole === "hokos") ? `
+                ${(currentUserRole === "admin" || currentUserRole === "hokos" || currentUserRole === "user") ? `
                     <button onclick="deleteUnderProcessPost('${postId}')">🗑 Törlés</button>
                     <button onclick="returnToList('${postId}')">↩️ Visszatesz</button>
-                    <button onclick="openSolutionModal('${postId}')">✅ Lezár</button>
-                ` : ""}
+                    <button onclick="openSolutionModal('${postId}')">✅ Lezár</button> : ""}
             `;
             postList.appendChild(div);
         }
