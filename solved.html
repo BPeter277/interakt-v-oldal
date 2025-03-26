@@ -51,7 +51,7 @@
 <body class="light-mode">
     <button id="back-to-main-btn" onclick="window.location.href='index.html'">Vissza a főmenübe</button>
     <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
-    <h1>Ügyintézés alatt lévő posztok</h1>
+    <h1>Lezárt ügyek</h1>
     <div id="under-process-list"></div>
 
     <div id="modal" class="modal">
@@ -63,7 +63,7 @@
         </div>
     </div>
 
-    <script type="module" src="under_process.js"></script>
+    <script type="module" src="solved.js"></script>
     <script>
     function toggleTheme() {
         const body = document.body;
