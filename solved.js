@@ -15,13 +15,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+let currentUserEmail = null;
 let currentUserRole = "user";
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+	currentUserEmail = user.email;
         const userDocs = await getDocs(collection(db, "users"));
         userDocs.forEach((docu) => {
-            if (docu.id === user.email) {
+            if (docu.id === currentUserEmail) {
                 currentUserRole = docu.data().role;
             }
         });
