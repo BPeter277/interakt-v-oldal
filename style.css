@@ -106,19 +106,6 @@ ul#user-list {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-#resend-verification-btn {
-    background-color: transparent;
-    border: none;
-    color: gray;
-    text-decoration: underline;
-    font-size: 12px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-#resend-verification-btn:hover {
-    color: darkgray;
-}
-
 .animated-title {
   animation: slideIn 1s ease-out forwards;
 }
