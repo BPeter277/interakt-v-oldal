@@ -11,7 +11,7 @@
             background-size: cover;
         }
         #user-email-display {
-            position: absolute;
+            position: fixed;
             top: 5px;
             left: 10px;
             font-size: 12px;
@@ -32,35 +32,6 @@
             width: 80%;
             max-width: 500px;
         }
-        #logout-btn {
-    	    display: none;
-    	    position: absolute; /* <-- itt a fixed helyett absolute */
-            top: 10px;
-    	    right: 10px;
-    	    background-color: var(--logout-color);
-    	    color: white;
-    	    padding: 6px 12px;
-    	    border-radius: 8px;
-    	    font-size: 14px;
-    	    cursor: pointer;
-	}
-        #logout-btn:hover {
-            background-color: #b71c1c;
-        }
-        #password-change-btn {
-    	    background-color: transparent;
-            border: none;
-            color: gray;
-            text-decoration: underline;
-            font-size: 12px;
-            cursor: pointer;
-            position: absolute; /* fixed helyett absolute */
-            top: 50px;
-            right: 10px;
-	}
-        #password-change-btn:hover {
-            color: darkgray;
-        }
         #resend-verification-btn {
             background-color: transparent;
             border: none;
@@ -78,8 +49,8 @@
 <body class="before-login">
     <div id="user-email-display"></div>
     <div class="header">
-        <button id="logout-btn" onclick="kijelentkez()">Kijelentkezés</button>
-        <button id="password-change-btn" onclick="location.href='password_change.html'">Jelszómódosítás</button>
+        <button id="logout-btn" onclick="kijelentkez()" style="display:none;">Kijelentkezés</button>
+        <button id="password-change-btn" onclick="location.href='password_change.html'" style="display:none;">Jelszómódosítás</button>
     </div>
 
     <h1 class="animated-title" id="welcome-text">Jelentkezz be vagy regisztrálj, hogy használhasd a funkciókat!</h1>

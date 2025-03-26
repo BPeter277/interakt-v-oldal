@@ -51,7 +51,6 @@ async function listUnderProcess() {
     		<p><strong>Téma:</strong> ${data.topic}</p>
     		<p><small>Kiírás dátuma: ${new Date(data.date.seconds * 1000).toLocaleString()}</small></p>
     		<p><strong>Lájkok:</strong> ${data.likes || 0}</p>
-		</button>
     		${(currentUserRole === "admin" || currentUserRole === "hokos") 
         		? `<button onclick="openSolutionModal('${post.id}')">Lezárás</button>
            		<button onclick="returnToList('${post.id}')">Visszatesz</button>
